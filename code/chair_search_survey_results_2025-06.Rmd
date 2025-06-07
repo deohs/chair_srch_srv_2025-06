@@ -1,0 +1,224 @@
+---
+title: "Chair Search Survey Results"
+author: "DEOHS"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: 
+    keep_md: true
+  html_document:
+    keep_md: true
+editor_options:
+  chunk_output_type: console
+---
+
+```{r knitr_setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, echo = FALSE)
+```
+
+```{r package_setup}
+# Load packages, installing as needed
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
+pacman::p_load(here, folders, readxl, tibble, dplyr, tidyr, stringr, purrr, 
+               vote)
+```
+
+```{r folder_setup}
+# Get the list of standard folders and create any folders which are missing
+conf_file <- here('conf', 'folders.yml')
+folders <- get_folders(conf_file)
+result <- create_folders(folders)
+```
+
+```{r functions}
+show_counts <- function(df, x) {
+  df %>% group_by({{x}}) %>% summarise(Count = n()) %>% 
+    arrange(desc(Count), {{x}}) %>% knitr::kable()
+}
+
+show_comments <- function(x) {
+  x %>% .[!is.na(.)] %>% knitr::kable(, col.names = 'Comments')
+}
+
+xform_ranking <- function(x) {
+  x %>% str_remove(';$') %>% str_split('\\s*;\\s*') %>% 
+    setNames('Candidate') %>% as_tibble() %>% 
+    rowid_to_column(var = 'Rank') %>% 
+    separate_longer_delim(Candidate, '=') %>% 
+    mutate(Candidate = str_trim(Candidate))
+}
+```
+
+```{r get_data}
+fn <- 'DEOHS Faculty Feedback Survey_ Chair Search.xlsx'
+txt_fn <- str_replace(fn, '\\.xlsx$', '.txt')
+csv_fn <- str_replace(fn, '\\.xlsx$', '.csv')
+fp <- here(folders$data, fn)
+txt_fp <- here(folders$data, txt_fn)
+csv_fp <- here(folders$data, csv_fn)
+
+new_names <- c('id', 'start_time', 'end_time', 'mod_time', 
+               'q01_myrank', 'q02_mytrack', 'q03_pref_int_ext', 
+               'q04_affect_start', 'q05_affect_start_comment',
+               'q06_affect_cost', 'q07_affect_cost_comment', 
+               'q08_affect_funds', 'q09_affect_funds_comment',
+               'q10_affect_freeze', 'q11_affect_freeze_comment', 
+               'q12_ranking', 'q13_ranking_comment', 
+               'q14_final_comments')
+
+if (( ! file.exists(csv_fp) ) | 
+    (file.exists(fp) & (file.mtime(fp) > file.mtime(csv_fp))) ) {
+  df <- read_xlsx(fp) %>% 
+    #filter(! Email %in% c('foo@uw.edu', 'bar@uw.edu')) %>%   # Remove tests
+    select(-Email, -Name)
+  old_names <- names(df) %>% str_remove_all('\\r\\n.*$')
+  writeLines(old_names, txt_fp)
+  old_names <- as.list(old_names)
+  names(old_names) <- new_names
+  names(df) <- new_names
+  write.csv(df, csv_fp, row.names = FALSE)
+} else {
+  df <- read.csv(csv_fp, stringsAsFactors = FALSE)
+  old_names <- as.list(readLines(txt_fp)) %>% .[. != ''] %>% .[1:18]
+  names(old_names) <- new_names
+}
+```
+
+## Section 1
+
+### Q1: Rank
+
+`r old_names$q01_myrank`
+
+```{r q01_myrank}
+show_counts(df, q01_myrank)
+```
+
+### Q2: Track
+
+`r old_names$q02_mytrack`
+
+```{r q02_mytrack}
+show_counts(df, q02_mytrack)
+```
+
+### Q3: Preference (Internal, External, or None)
+
+`r old_names$q03_pref_int_ext`
+
+```{r q03_pref_int_ext}
+show_counts(df, q03_pref_int_ext)
+```
+
+\newpage
+
+## Section 2
+
+### Q4: Preference (affect factor: delayed start)
+
+`r old_names$q04_affect_start`
+
+```{r q04_affect_start}
+show_counts(df, q04_affect_start)
+```
+
+### Q5: Comments
+
+```{r q05_affect_start_comment}
+show_comments(df$q05_affect_start_comment)
+```
+
+### Q6: Preference (affect factor: additional cost)
+
+`r old_names$q06_affect_cost`
+
+```{r q06_affect_cost}
+show_counts(df, q06_affect_cost)
+```
+
+### Q7: Comments
+
+```{r q07_affect_cost_comment}
+show_comments(df$q07_affect_cost_comment)
+```
+
+### Q8: Preference (affect factor: availability of funds)
+
+`r old_names$q08_affect_funds`
+
+```{r q08_affect_funds}
+show_counts(df, q08_affect_funds)
+```
+
+### Q9: Comments
+
+```{r q09_affect_funds_comment}
+show_comments(df$q09_affect_funds_comment)
+```
+
+### Q10: Preference (affect factor: opportunity cost / hiring freeze)
+
+`r old_names$q10_affect_freeze`
+
+```{r q10_affect_freeze}
+show_counts(df, q10_affect_freeze)
+```
+
+### Q11: Comments
+
+```{r q11_affect_freeze_comment}
+show_comments(df$q11_affect_freeze_comment)
+```
+
+\newpage
+
+## Section 3
+
+### Q12: Candidate Ranking
+
+`r old_names$q12_ranking`
+
+#### Ranking with {dplyr}
+
+```{r q12_ranking_dplyr}
+df_rank <- map_df(df$q12_ranking, xform_ranking, .id = 'id')
+df_rank_sum <- df_rank %>% summarise(Sum = sum(Rank, na.rm = T)) %>% pull(Sum)
+df_vote <- df_rank %>% 
+  group_by(Candidate) %>% summarise(Total = sum(Rank, na.rm = T)) %>%
+  arrange(Total) %>% rownames_to_column('Rank') %>% 
+  mutate(Rank = as.character(Rank)) %>% 
+  add_row(Rank = 'Sum', Candidate = '', Total = df_rank_sum) %>% 
+  mutate(Elected = ifelse(Rank == '1', 'x', '')) 
+elected <- df_vote %>% filter(Elected == 'x') %>% pull(Candidate)
+df_vote %>% knitr::kable(align = 'llrc')
+```
+
+Elected: `r elected`
+
+#### Ranking with {vote}
+
+```{r q12_ranking_vote, results='asis'}
+df_rank_wide <- df_rank %>% 
+  pivot_wider(names_from = Candidate, values_from = Rank, values_fill = NA) %>%
+  select(-id)
+df_rank_wide %>% 
+  count.votes(method = 'score', max.score = 5, larger.wins = FALSE)
+```
+
+### Q13: Comments
+
+```{r q13_ranking_comment}
+show_comments(df$q13_ranking_comment)
+```
+
+\newpage
+
+### Q14: Final Comments
+
+```{r q14_final_comments}
+show_comments(df$q14_final_comments)
+```
+
+```{r folder_cleanup}
+# Cleanup unused (empty) folders
+result <- cleanup_folders(folders)
+```
