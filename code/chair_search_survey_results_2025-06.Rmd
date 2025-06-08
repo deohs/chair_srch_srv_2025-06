@@ -188,21 +188,23 @@ df_vote <- df_rank %>%
   mutate(Rank = as.character(Rank)) %>% 
   add_row(Rank = 'Sum', Candidate = '', Total = df_rank_sum) %>% 
   mutate(Elected = ifelse(Total == min(Total), 'x', '')) 
-elected <- df_vote %>% filter(Elected == 'x') %>% pull(Candidate)
 df_vote %>% knitr::kable(align = 'llrc')
 ```
 
-Elected: `r elected`
-
 #### Ranking with {vote}
 
-```{r q12_ranking_vote, results='asis'}
+```{r q12_ranking_vote}
 df_rank_wide <- df_rank %>% 
   pivot_wider(names_from = Candidate, values_from = Rank, values_fill = NA) %>%
   select(-id)
-df_rank_wide %>% 
-  count.votes(method = 'score', max.score = 5, larger.wins = FALSE)
+df_vote_score <- df_rank_wide %>% count.votes(
+    method = 'score', max.score = 5, larger.wins = FALSE, quiet = TRUE
+    ) %>% summary() %>% rownames_to_column('Rank') %>% 
+  mutate(Total = as.integer(Total)) %>% as_tibble()
+df_vote_score %>% knitr::kable(align = 'llrc')
 ```
+
+The two methods yielded identical results: `r identical(df_vote, df_vote_score)`
 
 ```{r q12_ranking_heatmap}
 pal <- hcl.colors(5, "RdYlGn")
