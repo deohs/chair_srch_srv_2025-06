@@ -187,7 +187,7 @@ df_vote <- df_rank %>%
   arrange(Total) %>% rownames_to_column('Rank') %>% 
   mutate(Rank = as.character(Rank)) %>% 
   add_row(Rank = 'Sum', Candidate = '', Total = df_rank_sum) %>% 
-  mutate(Elected = ifelse(Rank == '1', 'x', '')) 
+  mutate(Elected = ifelse(Total == min(Total), 'x', '')) 
 elected <- df_vote %>% filter(Elected == 'x') %>% pull(Candidate)
 df_vote %>% knitr::kable(align = 'llrc')
 ```
