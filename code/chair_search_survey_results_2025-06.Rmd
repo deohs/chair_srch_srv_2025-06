@@ -46,6 +46,10 @@ xform_ranking <- function(x) {
     separate_longer_delim(Candidate, '=') %>% 
     mutate(Candidate = str_trim(Candidate))
 }
+
+get_rank <- function(x) {
+  
+}
 ```
 
 ```{r get_data}
@@ -188,6 +192,7 @@ df_vote <- df_rank %>%
   mutate(Rank = as.character(Rank)) %>% 
   add_row(Rank = 'Sum', Candidate = '', Total = df_rank_sum) %>% 
   mutate(Elected = ifelse(Total == min(Total), 'x', '')) 
+df_vote$Rank[1:5] <- rank(df_vote$Total[1:5], ties.method='min')
 df_vote %>% knitr::kable(align = 'llrc')
 ```
 
@@ -201,6 +206,7 @@ df_vote_score <- df_rank_wide %>% count.votes(
     method = 'score', max.score = 5, larger.wins = FALSE, quiet = TRUE
     ) %>% summary() %>% rownames_to_column('Rank') %>% 
   mutate(Total = as.integer(Total)) %>% as_tibble()
+df_vote_score$Rank[1:5] <- rank(df_vote_score$Total[1:5], ties.method='min')
 df_vote_score %>% knitr::kable(align = 'llrc')
 ```
 
