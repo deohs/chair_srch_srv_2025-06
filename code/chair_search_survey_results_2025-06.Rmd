@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE)
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
 pacman::p_load(here, folders, readxl, tibble, dplyr, tidyr, stringr, purrr, 
-               vote, ggplot2, forcats)
+               vote, ggplot2, colorspace, forcats)
 ```
 
 ```{r folder_setup}
@@ -214,11 +214,13 @@ The two methods yielded identical results: `r identical(df_vote, df_vote_score)`
 
 ```{r q12_ranking_heatmap}
 pal <- hcl.colors(5, "RdYlGn")
+pal_text <- ifelse(df_rank$Rank < 2 | df_rank$Rank > 4, 'white', 'black')
 title <- 'Ranking Heatmap'
 df_rank <- df_rank %>%  
   mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:5]))
 df_rank %>% 
   ggplot(aes(Candidate, id, fill = Rank)) + geom_tile() + ggtitle(title) + 
+  geom_text(aes(label = Rank, alpha = 0.5), color = pal_text, size = 4) + 
   scale_fill_gradientn(colors = pal, transform = 'reverse') + theme_minimal() + 
   theme(
     axis.title.y = element_blank(), 
