@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE)
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
 pacman::p_load(here, folders, readxl, tibble, dplyr, tidyr, stringr, purrr, 
-               vote)
+               vote, ggplot2, forcats)
 ```
 
 ```{r folder_setup}
@@ -202,6 +202,21 @@ df_rank_wide <- df_rank %>%
   select(-id)
 df_rank_wide %>% 
   count.votes(method = 'score', max.score = 5, larger.wins = FALSE)
+```
+
+```{r q12_ranking_heatmap}
+pal <- hcl.colors(5, "RdYlGn")
+title <- 'Ranking Heatmap'
+df_rank <- df_rank %>%  
+  mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:5]))
+df_rank %>% 
+  ggplot(aes(Candidate, id, fill = Rank)) + geom_tile() + ggtitle(title) + 
+  scale_fill_gradientn(colors = pal, transform = 'reverse') + theme_minimal() + 
+  theme(
+    axis.title.y = element_blank(), 
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_blank()
+  )
 ```
 
 ### Q13: Comments
