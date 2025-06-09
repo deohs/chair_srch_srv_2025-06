@@ -35,6 +35,23 @@ show_counts <- function(df, x) {
     arrange(desc(Count), {{x}}) %>% knitr::kable()
 }
 
+show_bar_plot <- function(df, x, lv, title = '') {
+  df %>% mutate(fct = factor({{x}}, ordered = TRUE, levels = rev(lv))) %>% 
+    ggplot(aes(fct)) + geom_bar() + coord_flip() + 
+    geom_text(aes(label = ..count..), stat = "count", hjust = 1.5, 
+              color = 'white', size = 3) +
+      theme_minimal() + theme(axis.title.y = element_blank()) + 
+      ggtitle(label = title)
+}
+
+show_bar_plot_identity <- function(df, x, y, lv, title = '') {
+  df %>% mutate(fct = factor({{x}}, ordered = TRUE, levels = rev(lv))) %>% 
+    ggplot(aes(fct, {{y}})) + geom_bar(stat = 'identity') + coord_flip() +
+    geom_text(aes(label = {{y}}), hjust = 1.5, color = 'white', size = 3) + 
+      theme_minimal() + theme(axis.title.y = element_blank()) + 
+      ggtitle(label = title)
+}
+
 show_comments <- function(x) {
   x %>% .[!is.na(.)] %>% knitr::kable(, col.names = 'Comments')
 }
@@ -46,10 +63,6 @@ xform_ranking <- function(x) {
     separate_longer_delim(Candidate, '=') %>% 
     mutate(Candidate = str_trim(Candidate))
 }
-
-get_rank <- function(x) {
-  
-}
 ```
 
 ```{r get_data}
@@ -59,6 +72,12 @@ csv_fn <- str_replace(fn, '\\.xlsx$', '.csv')
 fp <- here(folders$data, fn)
 txt_fp <- here(folders$data, txt_fn)
 csv_fp <- here(folders$data, csv_fn)
+
+level <- c("Strongly favor internal candidate", 
+           "Slightly favor internal candidate", 
+           "This does not affect my final preference for an internal or external candidate.", 
+           "Slightly favor external candidate", 
+           "Strongly favor external candidate")
 
 new_names <- c('id', 'start_time', 'end_time', 'mod_time', 
                'q01_myrank', 'q02_mytrack', 'q03_pref_int_ext', 
@@ -125,11 +144,17 @@ show_counts(df, q03_pref_int_ext)
 show_counts(df, q04_affect_start)
 ```
 
+```{r q04_affect_start_plot, fig.height=2.5}
+show_bar_plot(df, q04_affect_start, level, 'q04_affect_start')
+```
+
 ### Q5: Comments
 
 ```{r q05_affect_start_comment}
 show_comments(df$q05_affect_start_comment)
 ```
+
+\newpage
 
 ### Q6: Preference (affect factor: additional cost)
 
@@ -139,11 +164,17 @@ show_comments(df$q05_affect_start_comment)
 show_counts(df, q06_affect_cost)
 ```
 
+```{r q06_affect_cost_plot, fig.height=2.5}
+show_bar_plot(df, q06_affect_cost, level, 'q06_affect_cost')
+```
+
 ### Q7: Comments
 
 ```{r q07_affect_cost_comment}
 show_comments(df$q07_affect_cost_comment)
 ```
+
+\newpage
 
 ### Q8: Preference (affect factor: availability of funds)
 
@@ -153,11 +184,17 @@ show_comments(df$q07_affect_cost_comment)
 show_counts(df, q08_affect_funds)
 ```
 
+```{r q08_affect_funds_plot, fig.height=2.5}
+show_bar_plot(df, q08_affect_funds, level, 'q08_affect_funds')
+```
+
 ### Q9: Comments
 
 ```{r q09_affect_funds_comment}
 show_comments(df$q09_affect_funds_comment)
 ```
+
+\newpage
 
 ### Q10: Preference (affect factor: opportunity cost / hiring freeze)
 
@@ -165,6 +202,10 @@ show_comments(df$q09_affect_funds_comment)
 
 ```{r q10_affect_freeze}
 show_counts(df, q10_affect_freeze)
+```
+
+```{r q10_affect_freeze_plot, fig.height=2.5}
+show_bar_plot(df, q10_affect_freeze, level, 'q10_affect_freeze')
 ```
 
 ### Q11: Comments
@@ -212,12 +253,18 @@ df_vote_score %>% knitr::kable(align = 'llrc')
 
 The two methods yielded identical results: `r identical(df_vote, df_vote_score)`
 
+```{r q12_ranking_plot, fig.height=2.5}
+df_rank <- df_rank %>%  
+  mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:5]))
+title <- 'Total Ranking Scores per Candidate (lower Total means higher rank)'
+show_bar_plot_identity(df = df_vote[1:5, ], x = Candidate, y = Total, 
+                       lv = levels(df_rank$Candidate), title = title)
+```
+
 ```{r q12_ranking_heatmap}
 pal <- hcl.colors(5, "RdYlGn")
 pal_text <- ifelse(df_rank$Rank < 2 | df_rank$Rank > 4, 'white', 'black')
 title <- 'Ranking Heatmap'
-df_rank <- df_rank %>%  
-  mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:5]))
 df_rank %>% 
   ggplot(aes(Candidate, id, fill = Rank)) + geom_tile() + ggtitle(title) + 
   geom_text(aes(label = Rank), alpha = 0.5, color = pal_text, size = 4) + 
