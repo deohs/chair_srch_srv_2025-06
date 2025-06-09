@@ -166,6 +166,8 @@ show_counts(df, q03_pref_int_ext)
 show_bar_plot(df, q04_affect_start, 'q04_affect_start')
 ```
 
+<p>&nbsp;</p>
+
 ```{r q05_affect_start_comment}
 show_comments(df$q05_affect_start_comment)
 ```
@@ -175,6 +177,8 @@ show_comments(df$q05_affect_start_comment)
 ```{r q04_affect_start_xtab_myrank_plot, fig.height=3.5}
 show_xtab_plot(df, 'q04_affect_start', 'q01_myrank', title.y = 'Respondent Rank')
 ```
+
+<p>&nbsp;</p>
 
 ```{r q04_affect_start_xtab_mytrack_plot, fig.height=3.5}
 show_xtab_plot(df, 'q04_affect_start', 'q02_mytrack', title.y = 'Respondent Track')
@@ -190,6 +194,8 @@ show_xtab_plot(df, 'q04_affect_start', 'q02_mytrack', title.y = 'Respondent Trac
 show_bar_plot(df, q06_affect_cost, 'q06_affect_cost')
 ```
 
+<p>&nbsp;</p>
+
 ```{r q07_affect_cost_comment}
 show_comments(df$q07_affect_cost_comment)
 ```
@@ -199,6 +205,8 @@ show_comments(df$q07_affect_cost_comment)
 ```{r q06_affect_cost_xtab_myrank_plot, fig.height=3.5}
 show_xtab_plot(df, 'q06_affect_cost', 'q01_myrank', title.y = 'Respondent Rank')
 ```
+
+<p>&nbsp;</p>
 
 ```{r q06_affect_cost_xtab_mytrack_plot, fig.height=3.5}
 show_xtab_plot(df, 'q06_affect_cost', 'q02_mytrack', title.y = 'Respondent Track')
@@ -214,6 +222,8 @@ show_xtab_plot(df, 'q06_affect_cost', 'q02_mytrack', title.y = 'Respondent Track
 show_bar_plot(df, q08_affect_funds, 'q08_affect_funds')
 ```
 
+<p>&nbsp;</p>
+
 ```{r q09_affect_funds_comment}
 show_comments(df$q09_affect_funds_comment)
 ```
@@ -223,6 +233,8 @@ show_comments(df$q09_affect_funds_comment)
 ```{r q08_affect_funds_xtab_myrank_plot, fig.height=3.5}
 show_xtab_plot(df, 'q08_affect_funds', 'q01_myrank', title.y = 'Respondent Rank')
 ```
+
+<p>&nbsp;</p>
 
 ```{r q08_affect_funds_xtab_mytrack_plot, fig.height=3.5}
 show_xtab_plot(df, 'q08_affect_funds', 'q02_mytrack', title.y = 'Respondent Track')
@@ -238,6 +250,8 @@ show_xtab_plot(df, 'q08_affect_funds', 'q02_mytrack', title.y = 'Respondent Trac
 show_bar_plot(df, q10_affect_freeze, 'q10_affect_freeze')
 ```
 
+<p>&nbsp;</p>
+
 ```{r q11_affect_freeze_comment}
 show_comments(df$q11_affect_freeze_comment)
 ```
@@ -247,6 +261,8 @@ show_comments(df$q11_affect_freeze_comment)
 ```{r q10_affect_freeze_xtab_myrank_plot, fig.height=3.5}
 show_xtab_plot(df, 'q10_affect_freeze', 'q01_myrank', title.y = 'Respondent Rank')
 ```
+
+<p>&nbsp;</p>
 
 ```{r q10_affect_freeze_xtab_mytrack_plot, fig.height=3.5}
 show_xtab_plot(df, 'q10_affect_freeze', 'q02_mytrack', title.y = 'Respondent Track')
@@ -291,6 +307,8 @@ df_vote_score %>% knitr::kable(align = 'llrc')
 
 The two methods yielded identical results: `r identical(df_vote, df_vote_score)`
 
+<p>&nbsp;</p>
+
 ```{r q12_ranking_plot, fig.height=2.5}
 df_rank <- df_rank %>%  
   mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:5]))
@@ -299,6 +317,8 @@ df_vote[1:5, ] %>%
   mutate(Candidate = factor(Candidate, ordered = TRUE, 
                             levels = levels(df_rank$Candidate))) %>% show_bar_plot_identity(x = Candidate, y = Total, title = title)
 ```
+
+\newpage
 
 ```{r q12_ranking_heatmap}
 pal <- hcl.colors(5, "RdYlGn")
