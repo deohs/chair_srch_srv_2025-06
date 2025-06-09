@@ -1,5 +1,5 @@
 ---
-title: "Chair Search Survey Results"
+title: "Chair Search Survey Detailed Results"
 author: "DEOHS"
 date: "`r Sys.Date()`"
 output:
@@ -18,7 +18,8 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r package_setup}
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
-pacman::p_load(here, folders, readxl, tibble, dplyr, tidyr, stringr, ggplot2)
+pacman::p_load(here, folders, readxl, tibble, dplyr, tidyr, stringr, purrr, 
+               vote, ggplot2, colorspace, forcats)
 ```
 
 ```{r folder_setup}
@@ -49,6 +50,18 @@ show_bar_plot_identity <- function(df, x, y, lv, title = '') {
     geom_text(aes(label = {{y}}), hjust = 1.5, color = 'white', size = 3) + 
       theme_minimal() + theme(axis.title.y = element_blank()) + 
       ggtitle(label = title)
+}
+
+show_comments <- function(x) {
+  x %>% .[!is.na(.)] %>% knitr::kable(, col.names = 'Comments')
+}
+
+xform_ranking <- function(x) {
+  x %>% str_remove(';$') %>% str_split('\\s*;\\s*') %>% 
+    setNames('Candidate') %>% as_tibble() %>% 
+    rowid_to_column(var = 'Rank') %>% 
+    separate_longer_delim(Candidate, '=') %>% 
+    mutate(Candidate = str_trim(Candidate))
 }
 ```
 
@@ -131,12 +144,26 @@ show_counts(df, q03_pref_int_ext)
 show_bar_plot(df, q04_affect_start, level, 'q04_affect_start')
 ```
 
+### Q5: Comments
+
+```{r q05_affect_start_comment}
+show_comments(df$q05_affect_start_comment)
+```
+
+\newpage
+
 ### Q6: Preference (affect factor: additional cost)
 
 `r old_names$q06_affect_cost`
 
 ```{r q06_affect_cost_plot, fig.height=2.5}
 show_bar_plot(df, q06_affect_cost, level, 'q06_affect_cost')
+```
+
+### Q7: Comments
+
+```{r q07_affect_cost_comment}
+show_comments(df$q07_affect_cost_comment)
 ```
 
 \newpage
@@ -149,12 +176,104 @@ show_bar_plot(df, q06_affect_cost, level, 'q06_affect_cost')
 show_bar_plot(df, q08_affect_funds, level, 'q08_affect_funds')
 ```
 
+### Q9: Comments
+
+```{r q09_affect_funds_comment}
+show_comments(df$q09_affect_funds_comment)
+```
+
+\newpage
+
 ### Q10: Preference (affect factor: opportunity cost / hiring freeze)
 
 `r old_names$q10_affect_freeze`
 
 ```{r q10_affect_freeze_plot, fig.height=2.5}
 show_bar_plot(df, q10_affect_freeze, level, 'q10_affect_freeze')
+```
+
+### Q11: Comments
+
+```{r q11_affect_freeze_comment}
+show_comments(df$q11_affect_freeze_comment)
+```
+
+\newpage
+
+## Section 3
+
+### Q12: Candidate Ranking
+
+`r old_names$q12_ranking`
+
+#### Ranking with {dplyr}
+
+```{r q12_ranking_dplyr}
+df_rank <- map_df(df$q12_ranking, xform_ranking, .id = 'id')
+df_rank_sum <- df_rank %>% summarise(Sum = sum(Rank, na.rm = T)) %>% pull(Sum)
+df_vote <- df_rank %>% 
+  group_by(Candidate) %>% summarise(Total = sum(Rank, na.rm = T)) %>%
+  arrange(Total) %>% rownames_to_column('Rank') %>% 
+  mutate(Rank = as.character(Rank)) %>% 
+  add_row(Rank = 'Sum', Candidate = '', Total = df_rank_sum) %>% 
+  mutate(Elected = ifelse(Total == min(Total), 'x', '')) 
+df_vote$Rank[1:5] <- rank(df_vote$Total[1:5], ties.method='min')
+df_vote %>% knitr::kable(align = 'llrc')
+```
+
+#### Ranking with {vote}
+
+```{r q12_ranking_vote}
+df_rank_wide <- df_rank %>% 
+  pivot_wider(names_from = Candidate, values_from = Rank, values_fill = NA) %>%
+  select(-id)
+df_vote_score <- df_rank_wide %>% count.votes(
+    method = 'score', max.score = 5, larger.wins = FALSE, quiet = TRUE
+    ) %>% summary() %>% rownames_to_column('Rank') %>% 
+  mutate(Total = as.integer(Total)) %>% as_tibble()
+df_vote_score$Rank[1:5] <- rank(df_vote_score$Total[1:5], ties.method='min')
+df_vote_score %>% knitr::kable(align = 'llrc')
+```
+
+The two methods yielded identical results: `r identical(df_vote, df_vote_score)`
+
+```{r q12_ranking_plot, fig.height=2.5}
+df_rank <- df_rank %>%  
+  mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:5]))
+title <- 'Total Ranking Scores per Candidate (lower Total means higher rank)'
+show_bar_plot_identity(df = df_vote[1:5, ], x = Candidate, y = Total, 
+                       lv = levels(df_rank$Candidate), title = title)
+```
+
+```{r q12_ranking_heatmap}
+pal <- hcl.colors(5, "RdYlGn")
+pal_text <- ifelse(df_rank$Rank < 2 | df_rank$Rank > 4, 'white', 'black')
+title <- 'Ranking Heatmap'
+df_rank %>% 
+  ggplot(aes(Candidate, id, fill = Rank)) + geom_tile() + ggtitle(title) + 
+  geom_text(aes(label = Rank), alpha = 0.5, color = pal_text, size = 4) + 
+  scale_fill_gradientn(colors = pal, transform = 'reverse') + theme_minimal() + 
+  theme(
+    axis.ticks.x = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(), 
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_blank()
+  )
+```
+
+### Q13: Comments
+
+```{r q13_ranking_comment}
+show_comments(df$q13_ranking_comment)
+```
+
+\newpage
+
+### Q14: Final Comments
+
+```{r q14_final_comments}
+show_comments(df$q14_final_comments)
 ```
 
 ```{r folder_cleanup}
