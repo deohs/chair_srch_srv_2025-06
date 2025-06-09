@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE)
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
 pacman::p_load(here, folders, readxl, tibble, dplyr, tidyr, stringr, purrr, 
-               vote, ggplot2, colorspace, forcats)
+               vote, ggplot2, colorspace, forcats, CGPfunctions)
 ```
 
 ```{r folder_setup}
@@ -35,18 +35,19 @@ show_counts <- function(df, x) {
     arrange(desc(Count), {{x}}) %>% knitr::kable()
 }
 
-show_bar_plot <- function(df, x, lv, title = '') {
-  df %>% mutate(fct = factor({{x}}, ordered = TRUE, levels = rev(lv))) %>% 
-    ggplot(aes(fct)) + geom_bar() + coord_flip() + 
+show_bar_plot <- function(df, x, title = '') {
+  df %>% 
+    ggplot(aes(fct_rev({{x}}))) + geom_bar() + coord_flip() + 
     geom_text(aes(label = after_stat(count)), stat = "count", hjust = 1.5, 
               color = 'white', size = 3) +
       theme_minimal() + theme(axis.title.y = element_blank()) + 
       ggtitle(label = title)
 }
 
-show_bar_plot_identity <- function(df, x, y, lv, title = '') {
-  df %>% mutate(fct = factor({{x}}, ordered = TRUE, levels = rev(lv))) %>% 
-    ggplot(aes(fct, {{y}})) + geom_bar(stat = 'identity') + coord_flip() +
+show_bar_plot_identity <- function(df, x, y, title = '') {
+  df %>% 
+    ggplot(aes(fct_rev({{x}}), {{y}})) + geom_bar(stat = 'identity') + 
+    coord_flip() +
     geom_text(aes(label = {{y}}), hjust = 1.5, color = 'white', size = 3) + 
       theme_minimal() + theme(axis.title.y = element_blank()) + 
       ggtitle(label = title)
@@ -79,6 +80,12 @@ level <- c("Strongly favor internal candidate",
            "Slightly favor external candidate", 
            "Strongly favor external candidate")
 
+label <- c("Strongly favor internal candidate", 
+           "Slightly favor internal candidate", 
+           "Does not affect my final preference", 
+           "Slightly favor external candidate", 
+           "Strongly favor external candidate")
+
 new_names <- c('id', 'start_time', 'end_time', 'mod_time', 
                'q01_myrank', 'q02_mytrack', 'q03_pref_int_ext', 
                'q04_affect_start', 'q05_affect_start_comment',
@@ -104,6 +111,9 @@ if (( ! file.exists(csv_fp) ) |
   old_names <- as.list(readLines(txt_fp)) %>% .[. != ''] %>% .[1:18]
   names(old_names) <- new_names
 }
+df <- df %>% 
+  mutate(across(matches('^q\\d+_affect_[a-z]+$'), 
+                ~ factor(.x, levels = level, labels = label, ordered = TRUE)))
 ```
 
 ## Section 1
@@ -141,13 +151,27 @@ show_counts(df, q03_pref_int_ext)
 `r old_names$q04_affect_start`
 
 ```{r q04_affect_start_plot, fig.height=2.5}
-show_bar_plot(df, q04_affect_start, level, 'q04_affect_start')
+show_bar_plot(df, q04_affect_start, 'q04_affect_start')
 ```
-
-### Q5: Comments
 
 ```{r q05_affect_start_comment}
 show_comments(df$q05_affect_start_comment)
+```
+
+\newpage
+
+```{r q04_affect_start_xtab_myrank_plot, fig.height=3.5}
+PlotXTabs2(df, x = q04_affect_start, y = q01_myrank, results.subtitle = FALSE, 
+           title = 'q04_affect_start by respondent rank', xlab = '',
+           sample.size.label = FALSE, legend.position = 'bottom') +
+  coord_flip()
+```
+
+```{r q04_affect_start_xtab_mytrack_plot, fig.height=3.5}
+PlotXTabs2(df, x = q04_affect_start, y = q02_mytrack, results.subtitle = FALSE,  
+           title = 'q04_affect_start by respondent track', xlab = '',
+           sample.size.label = FALSE, legend.position = 'bottom') + 
+  coord_flip()
 ```
 
 \newpage
@@ -157,13 +181,27 @@ show_comments(df$q05_affect_start_comment)
 `r old_names$q06_affect_cost`
 
 ```{r q06_affect_cost_plot, fig.height=2.5}
-show_bar_plot(df, q06_affect_cost, level, 'q06_affect_cost')
+show_bar_plot(df, q06_affect_cost, 'q06_affect_cost')
 ```
-
-### Q7: Comments
 
 ```{r q07_affect_cost_comment}
 show_comments(df$q07_affect_cost_comment)
+```
+
+\newpage
+
+```{r q06_affect_cost_xtab_myrank_plot, fig.height=3.5}
+PlotXTabs2(df, x = q06_affect_cost, y = q01_myrank,  results.subtitle = FALSE, 
+           title = 'q06_affect_cost by respondent rank', xlab = '',
+           sample.size.label = FALSE, legend.position = 'bottom') +
+  coord_flip()
+```
+
+```{r q06_affect_cost_xtab_mytrack_plot, fig.height=3.5}
+PlotXTabs2(df, x = q06_affect_cost, y = q02_mytrack,  results.subtitle = FALSE, 
+           title = 'q06_affect_cost by respondent track', xlab = '',
+           sample.size.label = FALSE, legend.position = 'bottom') + 
+  coord_flip()
 ```
 
 \newpage
@@ -173,13 +211,27 @@ show_comments(df$q07_affect_cost_comment)
 `r old_names$q08_affect_funds`
 
 ```{r q08_affect_funds_plot, fig.height=2.5}
-show_bar_plot(df, q08_affect_funds, level, 'q08_affect_funds')
+show_bar_plot(df, q08_affect_funds, 'q08_affect_funds')
 ```
-
-### Q9: Comments
 
 ```{r q09_affect_funds_comment}
 show_comments(df$q09_affect_funds_comment)
+```
+
+\newpage
+
+```{r q08_affect_funds_xtab_myrank_plot, fig.height=3.5}
+PlotXTabs2(df, x = q08_affect_funds, y = q01_myrank,  results.subtitle = FALSE, 
+           title = 'q08_affect_funds by respondent rank', xlab = '',
+           sample.size.label = FALSE, legend.position = 'bottom') +
+  coord_flip()
+```
+
+```{r q08_affect_funds_xtab_mytrack_plot, fig.height=3.5}
+PlotXTabs2(df, x = q08_affect_funds, y = q02_mytrack,  results.subtitle = FALSE, 
+           title = 'q08_affect_funds by respondent track', xlab = '',
+           sample.size.label = FALSE, legend.position = 'bottom') + 
+  coord_flip()
 ```
 
 \newpage
@@ -189,13 +241,27 @@ show_comments(df$q09_affect_funds_comment)
 `r old_names$q10_affect_freeze`
 
 ```{r q10_affect_freeze_plot, fig.height=2.5}
-show_bar_plot(df, q10_affect_freeze, level, 'q10_affect_freeze')
+show_bar_plot(df, q10_affect_freeze, 'q10_affect_freeze')
 ```
-
-### Q11: Comments
 
 ```{r q11_affect_freeze_comment}
 show_comments(df$q11_affect_freeze_comment)
+```
+
+\newpage
+
+```{r q10_affect_freeze_xtab_myrank_plot, fig.height=3.5}
+PlotXTabs2(df, x = q10_affect_freeze, y = q01_myrank,  results.subtitle = FALSE, 
+           title = 'q10_affect_freeze by respondent rank', xlab = '',
+           sample.size.label = FALSE, legend.position = 'bottom') +
+  coord_flip()
+```
+
+```{r q10_affect_freeze_xtab_mytrack_plot, fig.height=3.5}
+PlotXTabs2(df, x = q10_affect_freeze, y = q02_mytrack,  results.subtitle = FALSE, 
+           title = 'q10_affect_freeze by respondent track', xlab = '',
+           sample.size.label = FALSE, legend.position = 'bottom') + 
+  coord_flip()
 ```
 
 \newpage
@@ -241,8 +307,9 @@ The two methods yielded identical results: `r identical(df_vote, df_vote_score)`
 df_rank <- df_rank %>%  
   mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:5]))
 title <- 'Total Ranking Scores per Candidate (lower Total means higher rank)'
-show_bar_plot_identity(df = df_vote[1:5, ], x = Candidate, y = Total, 
-                       lv = levels(df_rank$Candidate), title = title)
+df_vote[1:5, ] %>% 
+  mutate(Candidate = factor(Candidate, ordered = TRUE, 
+                            levels = levels(df_rank$Candidate))) %>% show_bar_plot_identity(x = Candidate, y = Total, title = title)
 ```
 
 ```{r q12_ranking_heatmap}

@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```{r package_setup}
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
-pacman::p_load(here, folders, readxl, tibble, dplyr, tidyr, stringr, ggplot2)
+pacman::p_load(here, folders, readxl, tibble, dplyr, forcats, stringr, ggplot2)
 ```
 
 ```{r folder_setup}
@@ -34,19 +34,11 @@ show_counts <- function(df, x) {
     arrange(desc(Count), {{x}}) %>% knitr::kable()
 }
 
-show_bar_plot <- function(df, x, lv, title = '') {
-  df %>% mutate(fct = factor({{x}}, ordered = TRUE, levels = rev(lv))) %>% 
-    ggplot(aes(fct)) + geom_bar() + coord_flip() + 
+show_bar_plot <- function(df, x, title = '') {
+  df %>% 
+    ggplot(aes(fct_rev({{x}}))) + geom_bar() + coord_flip() + 
     geom_text(aes(label = after_stat(count)), stat = "count", hjust = 1.5, 
               color = 'white', size = 3) +
-      theme_minimal() + theme(axis.title.y = element_blank()) + 
-      ggtitle(label = title)
-}
-
-show_bar_plot_identity <- function(df, x, y, lv, title = '') {
-  df %>% mutate(fct = factor({{x}}, ordered = TRUE, levels = rev(lv))) %>% 
-    ggplot(aes(fct, {{y}})) + geom_bar(stat = 'identity') + coord_flip() +
-    geom_text(aes(label = {{y}}), hjust = 1.5, color = 'white', size = 3) + 
       theme_minimal() + theme(axis.title.y = element_blank()) + 
       ggtitle(label = title)
 }
@@ -63,6 +55,12 @@ csv_fp <- here(folders$data, csv_fn)
 level <- c("Strongly favor internal candidate", 
            "Slightly favor internal candidate", 
            "This does not affect my final preference for an internal or external candidate.", 
+           "Slightly favor external candidate", 
+           "Strongly favor external candidate")
+
+label <- c("Strongly favor internal candidate", 
+           "Slightly favor internal candidate", 
+           "Does not affect my final preference", 
            "Slightly favor external candidate", 
            "Strongly favor external candidate")
 
@@ -91,6 +89,10 @@ if (( ! file.exists(csv_fp) ) |
   old_names <- as.list(readLines(txt_fp)) %>% .[. != ''] %>% .[1:18]
   names(old_names) <- new_names
 }
+
+df <- df %>% 
+  mutate(across(matches('^q\\d+_affect_[a-z]+$'), 
+                ~ factor(.x, levels = level, labels = label, ordered = TRUE)))
 ```
 
 ## Section 1
@@ -128,7 +130,7 @@ show_counts(df, q03_pref_int_ext)
 `r old_names$q04_affect_start`
 
 ```{r q04_affect_start_plot, fig.height=2.5}
-show_bar_plot(df, q04_affect_start, level, 'q04_affect_start')
+show_bar_plot(df, q04_affect_start, 'q04_affect_start')
 ```
 
 ### Q6: Preference (affect factor: additional cost)
@@ -136,7 +138,7 @@ show_bar_plot(df, q04_affect_start, level, 'q04_affect_start')
 `r old_names$q06_affect_cost`
 
 ```{r q06_affect_cost_plot, fig.height=2.5}
-show_bar_plot(df, q06_affect_cost, level, 'q06_affect_cost')
+show_bar_plot(df, q06_affect_cost, 'q06_affect_cost')
 ```
 
 \newpage
@@ -146,7 +148,7 @@ show_bar_plot(df, q06_affect_cost, level, 'q06_affect_cost')
 `r old_names$q08_affect_funds`
 
 ```{r q08_affect_funds_plot, fig.height=2.5}
-show_bar_plot(df, q08_affect_funds, level, 'q08_affect_funds')
+show_bar_plot(df, q08_affect_funds, 'q08_affect_funds')
 ```
 
 ### Q10: Preference (affect factor: opportunity cost / hiring freeze)
@@ -154,7 +156,7 @@ show_bar_plot(df, q08_affect_funds, level, 'q08_affect_funds')
 `r old_names$q10_affect_freeze`
 
 ```{r q10_affect_freeze_plot, fig.height=2.5}
-show_bar_plot(df, q10_affect_freeze, level, 'q10_affect_freeze')
+show_bar_plot(df, q10_affect_freeze, 'q10_affect_freeze')
 ```
 
 ```{r folder_cleanup}
