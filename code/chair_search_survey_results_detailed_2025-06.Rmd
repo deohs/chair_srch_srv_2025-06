@@ -124,7 +124,7 @@ df <- df %>%
   mutate(across(matches('^q\\d+_affect_[a-z]+$'), 
            ~ factor(.x, levels = affect_level, labels = affect_label, 
                     ordered = TRUE)),
-         across(ends_with('_comment'), 
+         across(matches('_comments?$'), 
            ~ ifelse(!is.na(.x), paste('•', str_remove_all(.x, '[\n]+')), .x)))
 ```
 
