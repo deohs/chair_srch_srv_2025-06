@@ -38,7 +38,7 @@ show_counts <- function(df, x) {
 show_bar_plot <- function(df, x, lv, title = '') {
   df %>% mutate(fct = factor({{x}}, ordered = TRUE, levels = rev(lv))) %>% 
     ggplot(aes(fct)) + geom_bar() + coord_flip() + 
-    geom_text(aes(label = ..count..), stat = "count", hjust = 1.5, 
+    geom_text(aes(label = after_stat(count)), stat = "count", hjust = 1.5, 
               color = 'white', size = 3) +
       theme_minimal() + theme(axis.title.y = element_blank()) + 
       ggtitle(label = title)
