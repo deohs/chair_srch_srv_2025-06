@@ -12,7 +12,7 @@ editor_options:
 ---
 
 ```{r knitr_setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, cache.rebuild = TRUE)
 ```
 
 ```{r package_setup}
@@ -42,6 +42,14 @@ show_bar_plot <- function(df, x, title = '') {
               color = 'white', size = 3) +
       theme_minimal() + theme(axis.title.y = element_blank()) + 
       ggtitle(label = title)
+}
+
+show_xtab_plot <- function(df, x, y, title.y) {
+  df[, x] <- fct_rev(df[, x]) 
+  PlotXTabs2(df, any_of(x), any_of(y), results.subtitle = FALSE, 
+             legend.title = y, title = paste(x, 'by', title.y), xlab = '',
+             sample.size.label = FALSE, legend.position = 'bottom') +
+    coord_flip()
 }
 
 show_bar_plot_identity <- function(df, x, y, title = '') {
@@ -74,17 +82,17 @@ fp <- here(folders$data, fn)
 txt_fp <- here(folders$data, txt_fn)
 csv_fp <- here(folders$data, csv_fn)
 
-level <- c("Strongly favor internal candidate", 
-           "Slightly favor internal candidate", 
-           "This does not affect my final preference for an internal or external candidate.", 
-           "Slightly favor external candidate", 
-           "Strongly favor external candidate")
+affect_level <- c("Strongly favor internal candidate", 
+  "Slightly favor internal candidate", 
+  "This does not affect my final preference for an internal or external candidate.", 
+  "Slightly favor external candidate", 
+  "Strongly favor external candidate")
 
-label <- c("Strongly favor internal candidate", 
-           "Slightly favor internal candidate", 
-           "Does not affect my final preference", 
-           "Slightly favor external candidate", 
-           "Strongly favor external candidate")
+affect_label <- c("Strongly favor internal candidate", 
+  "Slightly favor internal candidate", 
+  "Does not affect my final preference", 
+  "Slightly favor external candidate", 
+  "Strongly favor external candidate")
 
 new_names <- c('id', 'start_time', 'end_time', 'mod_time', 
                'q01_myrank', 'q02_mytrack', 'q03_pref_int_ext', 
@@ -113,7 +121,10 @@ if (( ! file.exists(csv_fp) ) |
 }
 df <- df %>% 
   mutate(across(matches('^q\\d+_affect_[a-z]+$'), 
-                ~ factor(.x, levels = level, labels = label, ordered = TRUE)))
+           ~ factor(.x, levels = affect_level, labels = affect_label, 
+                    ordered = TRUE)),
+         across(ends_with('_comment'), 
+           ~ ifelse(!is.na(.x), paste('•', str_remove_all(.x, '[\n]+')), .x)))
 ```
 
 ## Section 1
@@ -161,17 +172,11 @@ show_comments(df$q05_affect_start_comment)
 \newpage
 
 ```{r q04_affect_start_xtab_myrank_plot, fig.height=3.5}
-PlotXTabs2(df, x = q04_affect_start, y = q01_myrank, results.subtitle = FALSE, 
-           title = 'q04_affect_start by respondent rank', xlab = '',
-           sample.size.label = FALSE, legend.position = 'bottom') +
-  coord_flip()
+show_xtab_plot(df, 'q04_affect_start', 'q01_myrank', title.y = 'respondent rank')
 ```
 
 ```{r q04_affect_start_xtab_mytrack_plot, fig.height=3.5}
-PlotXTabs2(df, x = q04_affect_start, y = q02_mytrack, results.subtitle = FALSE,  
-           title = 'q04_affect_start by respondent track', xlab = '',
-           sample.size.label = FALSE, legend.position = 'bottom') + 
-  coord_flip()
+show_xtab_plot(df, 'q04_affect_start', 'q02_mytrack', title.y = 'respondent track')
 ```
 
 \newpage
@@ -191,17 +196,11 @@ show_comments(df$q07_affect_cost_comment)
 \newpage
 
 ```{r q06_affect_cost_xtab_myrank_plot, fig.height=3.5}
-PlotXTabs2(df, x = q06_affect_cost, y = q01_myrank,  results.subtitle = FALSE, 
-           title = 'q06_affect_cost by respondent rank', xlab = '',
-           sample.size.label = FALSE, legend.position = 'bottom') +
-  coord_flip()
+show_xtab_plot(df, 'q06_affect_cost', 'q01_myrank', title.y = 'respondent rank')
 ```
 
 ```{r q06_affect_cost_xtab_mytrack_plot, fig.height=3.5}
-PlotXTabs2(df, x = q06_affect_cost, y = q02_mytrack,  results.subtitle = FALSE, 
-           title = 'q06_affect_cost by respondent track', xlab = '',
-           sample.size.label = FALSE, legend.position = 'bottom') + 
-  coord_flip()
+show_xtab_plot(df, 'q06_affect_cost', 'q02_mytrack', title.y = 'respondent track')
 ```
 
 \newpage
@@ -221,17 +220,11 @@ show_comments(df$q09_affect_funds_comment)
 \newpage
 
 ```{r q08_affect_funds_xtab_myrank_plot, fig.height=3.5}
-PlotXTabs2(df, x = q08_affect_funds, y = q01_myrank,  results.subtitle = FALSE, 
-           title = 'q08_affect_funds by respondent rank', xlab = '',
-           sample.size.label = FALSE, legend.position = 'bottom') +
-  coord_flip()
+show_xtab_plot(df, 'q08_affect_funds', 'q01_myrank', title.y = 'respondent rank')
 ```
 
 ```{r q08_affect_funds_xtab_mytrack_plot, fig.height=3.5}
-PlotXTabs2(df, x = q08_affect_funds, y = q02_mytrack,  results.subtitle = FALSE, 
-           title = 'q08_affect_funds by respondent track', xlab = '',
-           sample.size.label = FALSE, legend.position = 'bottom') + 
-  coord_flip()
+show_xtab_plot(df, 'q08_affect_funds', 'q02_mytrack', title.y = 'respondent track')
 ```
 
 \newpage
@@ -251,17 +244,11 @@ show_comments(df$q11_affect_freeze_comment)
 \newpage
 
 ```{r q10_affect_freeze_xtab_myrank_plot, fig.height=3.5}
-PlotXTabs2(df, x = q10_affect_freeze, y = q01_myrank,  results.subtitle = FALSE, 
-           title = 'q10_affect_freeze by respondent rank', xlab = '',
-           sample.size.label = FALSE, legend.position = 'bottom') +
-  coord_flip()
+show_xtab_plot(df, 'q10_affect_freeze', 'q01_myrank', title.y = 'respondent rank')
 ```
 
 ```{r q10_affect_freeze_xtab_mytrack_plot, fig.height=3.5}
-PlotXTabs2(df, x = q10_affect_freeze, y = q02_mytrack,  results.subtitle = FALSE, 
-           title = 'q10_affect_freeze by respondent track', xlab = '',
-           sample.size.label = FALSE, legend.position = 'bottom') + 
-  coord_flip()
+show_xtab_plot(df, 'q10_affect_freeze', 'q02_mytrack', title.y = 'respondent track')
 ```
 
 \newpage
@@ -316,9 +303,9 @@ df_vote[1:5, ] %>%
 pal <- hcl.colors(5, "RdYlGn")
 pal_text <- ifelse(df_rank$Rank < 2 | df_rank$Rank > 4, 'white', 'black')
 title <- 'Ranking Heatmap'
-df_rank %>% 
+df_rank %>% mutate(id = as.integer((id))) %>% 
   ggplot(aes(Candidate, id, fill = Rank)) + geom_tile() + ggtitle(title) + 
-  geom_text(aes(label = Rank), alpha = 0.5, color = pal_text, size = 4) + 
+  geom_text(aes(label = Rank), alpha = 0.6, color = pal_text, size = 4) + 
   scale_fill_gradientn(colors = pal, transform = 'reverse') + theme_minimal() + 
   theme(
     axis.ticks.x = element_blank(),
