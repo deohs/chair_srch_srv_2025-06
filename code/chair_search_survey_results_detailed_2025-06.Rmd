@@ -36,12 +36,14 @@ show_counts <- function(df, x) {
 }
 
 show_bar_plot <- function(df, x, title = '') {
+  N <- nrow(df)
+  ylab_text <- paste0('Count (N=', N, ')')
   df %>% 
     ggplot(aes(fct_rev({{x}}))) + geom_bar() + coord_flip() + 
     geom_text(aes(label = after_stat(count)), stat = "count", hjust = 1.5, 
-              color = 'white', size = 3) +
-      theme_minimal() + theme(axis.title.y = element_blank()) + 
-      ggtitle(label = title)
+              color = 'white', size = 3) + 
+    theme_minimal() + theme(axis.title.y = element_blank()) + 
+    ylab(ylab_text) + ggtitle(label = title)
 }
 
 show_xtab_plot <- function(df, x, y, title.x = NULL, title.y = NULL) {
@@ -73,6 +75,12 @@ xform_ranking <- function(x) {
     rowid_to_column(var = 'Rank') %>% 
     separate_longer_delim(Candidate, '=') %>% 
     mutate(Candidate = str_trim(Candidate))
+}
+
+rank_ties <- function(df, rankvar = 'Rank', valvar = 'Total', rows = 1:5) {
+  df[[rankvar]][rows] <- 
+    as.numeric(factor(rank(df[[valvar]][rows], ties.method='min')))
+  df
 }
 ```
 
@@ -151,8 +159,8 @@ show_counts(df, q02_mytrack)
 
 `r old_names$q03_pref_int_ext`
 
-```{r q03_pref_int_ext}
-show_counts(df, q03_pref_int_ext)
+```{r q03_pref_int_ext_plot, fig.height=2.5}
+show_bar_plot(df, q03_pref_int_ext, 'q03_pref_int_ext')
 ```
 
 \newpage
@@ -284,11 +292,11 @@ df_rank <- map_df(df$q12_ranking, xform_ranking, .id = 'id')
 df_rank_sum <- df_rank %>% summarise(Sum = sum(Rank, na.rm = T)) %>% pull(Sum)
 df_vote <- df_rank %>% 
   group_by(Candidate) %>% summarise(Total = sum(Rank, na.rm = T)) %>%
-  arrange(Total) %>% rownames_to_column('Rank') %>% 
+  arrange(Total, Candidate) %>% rownames_to_column('Rank') %>% 
   mutate(Rank = as.character(Rank)) %>% 
   add_row(Rank = 'Sum', Candidate = '', Total = df_rank_sum) %>% 
   mutate(Elected = ifelse(Total == min(Total), 'x', '')) 
-df_vote$Rank[1:5] <- rank(df_vote$Total[1:5], ties.method='min')
+df_vote <- rank_ties(df_vote)
 df_vote %>% knitr::kable(align = 'llrc')
 ```
 
@@ -301,8 +309,9 @@ df_rank_wide <- df_rank %>%
 df_vote_score <- df_rank_wide %>% count.votes(
     method = 'score', max.score = 5, larger.wins = FALSE, quiet = TRUE
     ) %>% summary() %>% rownames_to_column('Rank') %>% 
-  mutate(Total = as.integer(Total)) %>% as_tibble()
-df_vote_score$Rank[1:5] <- rank(df_vote_score$Total[1:5], ties.method='min')
+  mutate(Total = as.integer(Total)) %>% as_tibble() %>% 
+  arrange(Total, Candidate)
+df_vote_score <- rank_ties(df_vote_score)
 df_vote_score %>% knitr::kable(align = 'llrc')
 ```
 

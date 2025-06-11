@@ -35,12 +35,14 @@ show_counts <- function(df, x) {
 }
 
 show_bar_plot <- function(df, x, title = '') {
+  N <- nrow(df)
+  ylab_text <- paste0('Count (N=', N, ')')
   df %>% 
     ggplot(aes(fct_rev({{x}}))) + geom_bar() + coord_flip() + 
     geom_text(aes(label = after_stat(count)), stat = "count", hjust = 1.5, 
-              color = 'white', size = 3) +
-      theme_minimal() + theme(axis.title.y = element_blank()) + 
-      ggtitle(label = title)
+              color = 'white', size = 3) + 
+    theme_minimal() + theme(axis.title.y = element_blank()) + 
+    ylab(ylab_text) + ggtitle(label = title)
 }
 ```
 
@@ -117,8 +119,8 @@ show_counts(df, q02_mytrack)
 
 `r old_names$q03_pref_int_ext`
 
-```{r q03_pref_int_ext}
-show_counts(df, q03_pref_int_ext)
+```{r q03_pref_int_ext_plot, fig.height=2.5}
+show_bar_plot(df, q03_pref_int_ext, 'q03_pref_int_ext')
 ```
 
 \newpage
