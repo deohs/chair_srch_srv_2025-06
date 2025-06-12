@@ -288,8 +288,6 @@ show_xtab_plot(df, 'q10_affect_freeze', 'q02_mytrack', title.y = 'Respondent Tra
 
 `r old_names$q12_ranking`
 
-#### Ranking
-
 ```{r q12_ranking_dplyr}
 df_rank <- map_df(df$q12_ranking, xform_ranking, .id = 'id')
 df_rank_sum <- df_rank %>% summarise(Sum = sum(Rank, na.rm = T)) %>% pull(Sum)
@@ -318,10 +316,10 @@ df_vote[1:5, ] %>%
 
 ```{r q12_ranking_heatmap, fig.height=2.5, fig.width=7}
 N <- nrow(df)
-title.y <- paste0('Ranking Response (N=', N, ')')
+title.y <- paste0('Response (N=', N, ')')
 pal <- hcl.colors(5, "RdYlGn")
 pal_text <- ifelse(df_rank$Rank < 2 | df_rank$Rank > 4, 'white', 'black')
-title <- 'Ranking Heatmap'
+title <- 'Candidate Ranking Heatmap'
 df_rank %>% mutate(id = as.integer((id))) %>% 
   ggplot(aes(fct_rev(Candidate), id, fill = Rank)) + geom_tile() + 
   geom_text(aes(label = Rank), alpha = 0.6, color = pal_text, size = 4) + 
