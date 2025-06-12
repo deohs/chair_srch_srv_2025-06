@@ -142,13 +142,13 @@ df <- df %>%
 ### Q1: `r old_names$q01_myrank`
 
 ```{r q01_myrank}
-show_counts(df, q01_myrank, caption = 'Count of Respondents by Rank')
+show_counts(df, q01_myrank, caption = 'Count of Respondents by Rank.')
 ```
 
 ### Q2: `r old_names$q02_mytrack`
 
 ```{r q02_mytrack}
-show_counts(df, q02_mytrack, caption = 'Count of Respondents by Track')
+show_counts(df, q02_mytrack, caption = 'Count of Respondents by Track.')
 ```
 
 ### Q3: Preference (Internal, External, or None)
@@ -178,7 +178,7 @@ show_bar_plot(df, q04_affect_start, 'q04_affect_start')
 
 ```{r q05_affect_start_comment}
 show_comments(df$q05_affect_start_comment, 
-              caption = 'Comments about q04_affect_start')
+              caption = 'Comments about q04_affect_start.')
 ```
 
 \newpage
@@ -207,7 +207,7 @@ show_bar_plot(df, q06_affect_cost, 'q06_affect_cost')
 
 ```{r q07_affect_cost_comment}
 show_comments(df$q07_affect_cost_comment, 
-              caption = 'Comments about q06_affect_cost')
+              caption = 'Comments about q06_affect_cost.')
 ```
 
 \newpage
@@ -236,7 +236,7 @@ show_bar_plot(df, q08_affect_funds, 'q08_affect_funds')
 
 ```{r q09_affect_funds_comment}
 show_comments(df$q09_affect_funds_comment, 
-              caption = 'Comments about q08_affect_funds')
+              caption = 'Comments about q08_affect_funds.')
 ```
 
 \newpage
@@ -265,7 +265,7 @@ show_bar_plot(df, q10_affect_freeze, 'q10_affect_freeze')
 
 ```{r q11_affect_freeze_comment}
 show_comments(df$q11_affect_freeze_comment, 
-              caption = 'Comments about q10_affect_freeze')
+              caption = 'Comments about q10_affect_freeze.')
 ```
 
 \newpage
@@ -299,7 +299,7 @@ df_vote <- df_rank %>%
   mutate(Elected = ifelse(Total == min(Total), 'x', '')) 
 df_vote <- rank_ties(df_vote)
 df_vote %>% knitr::kable(align = 'llrc', 
-                         caption = 'Candidate Ranking by Inverted Borda Count')
+                         caption = 'Candidate Ranking by Inverted Borda Count.')
 ```
 
 <p>&nbsp;</p>
@@ -337,7 +337,7 @@ df_rank %>% mutate(id = as.integer((id))) %>%
 
 ```{r q13_ranking_comment}
 show_comments(df$q13_ranking_comment, 
-              caption = 'Comments about q12_ranking')
+              caption = 'Comments about q12_ranking.')
 ```
 
 \newpage
@@ -345,7 +345,7 @@ show_comments(df$q13_ranking_comment,
 ### Q14: Final Comments
 
 ```{r q14_final_comments}
-show_comments(df$q14_final_comments, caption = 'Final Comments')
+show_comments(df$q14_final_comments, caption = 'Final Comments.')
 ```
 
 ```{r folder_cleanup}
