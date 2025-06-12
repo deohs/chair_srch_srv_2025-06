@@ -99,17 +99,13 @@ df <- df %>%
 
 ## Section 1
 
-### Q1: Rank
-
-`r old_names$q01_myrank`
+### Q1: `r old_names$q01_myrank`
 
 ```{r q01_myrank}
 show_counts(df, q01_myrank)
 ```
 
-### Q2: Track
-
-`r old_names$q02_mytrack`
+### Q2: `r old_names$q02_mytrack`
 
 ```{r q02_mytrack}
 show_counts(df, q02_mytrack)
