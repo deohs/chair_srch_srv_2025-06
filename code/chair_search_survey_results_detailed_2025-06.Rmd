@@ -91,7 +91,6 @@ csv_fn <- str_replace(fn, '\\.xlsx$', '.csv')
 fp <- here(folders$data, fn)
 txt_fp <- here(folders$data, txt_fn)
 csv_fp <- here(folders$data, csv_fn)
-num_cand <- 5
 
 affect_level <- c("Strongly favor internal candidate", 
   "Slightly favor internal candidate", 
@@ -325,6 +324,7 @@ show_xtab_plot(df, 'q10_affect_freeze', 'q02_mytrack',
 
 ```{r q12_ranking_dplyr}
 df_rank <- map_df(df$q12_ranking, xform_ranking, .id = 'id')
+num_cand <- length(unique(df_rank$Candidate))
 df_rank_sum <- df_rank %>% summarise(Sum = sum(Rank, na.rm = T)) %>% pull(Sum)
 df_vote <- df_rank %>% 
   group_by(Candidate) %>% summarise(Total = sum(Rank, na.rm = T)) %>%
