@@ -12,7 +12,7 @@ editor_options:
 ---
 
 ```{r knitr_setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, cache.rebuild = TRUE)
+knitr::opts_chunk$set(echo = FALSE, cache.rebuild = TRUE, fig.height=2.5)
 ```
 
 ```{r package_setup}
@@ -119,7 +119,7 @@ show_counts(df, q02_mytrack)
 
 `r old_names$q03_pref_int_ext`
 
-```{r q03_pref_int_ext_plot, fig.height=2.5}
+```{r q03_pref_int_ext_plot}
 q03_levels <- c("Internal", "No preference", "External")
 df$q03_pref_int_ext <- 
   factor(df$q03_pref_int_ext, levels = q03_levels, ordered = TRUE)
@@ -134,7 +134,7 @@ show_bar_plot(df, q03_pref_int_ext, 'q03_pref_int_ext')
 
 `r old_names$q04_affect_start`
 
-```{r q04_affect_start_plot, fig.height=2.5}
+```{r q04_affect_start_plot}
 show_bar_plot(df, q04_affect_start, 'q04_affect_start')
 ```
 
@@ -142,7 +142,7 @@ show_bar_plot(df, q04_affect_start, 'q04_affect_start')
 
 `r old_names$q06_affect_cost`
 
-```{r q06_affect_cost_plot, fig.height=2.5}
+```{r q06_affect_cost_plot}
 show_bar_plot(df, q06_affect_cost, 'q06_affect_cost')
 ```
 
@@ -152,7 +152,7 @@ show_bar_plot(df, q06_affect_cost, 'q06_affect_cost')
 
 `r old_names$q08_affect_funds`
 
-```{r q08_affect_funds_plot, fig.height=2.5}
+```{r q08_affect_funds_plot}
 show_bar_plot(df, q08_affect_funds, 'q08_affect_funds')
 ```
 
@@ -160,7 +160,7 @@ show_bar_plot(df, q08_affect_funds, 'q08_affect_funds')
 
 `r old_names$q10_affect_freeze`
 
-```{r q10_affect_freeze_plot, fig.height=2.5}
+```{r q10_affect_freeze_plot}
 show_bar_plot(df, q10_affect_freeze, 'q10_affect_freeze')
 ```
 

@@ -12,7 +12,7 @@ editor_options:
 ---
 
 ```{r knitr_setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, cache.rebuild = TRUE)
+knitr::opts_chunk$set(echo = FALSE, cache.rebuild = TRUE, fig.height=2.5)
 ```
 
 ```{r package_setup}
@@ -159,7 +159,7 @@ show_counts(df, q02_mytrack)
 
 `r old_names$q03_pref_int_ext`
 
-```{r q03_pref_int_ext_plot, fig.height=2.5}
+```{r q03_pref_int_ext_plot}
 q03_levels <- c("Internal", "No preference", "External")
 df$q03_pref_int_ext <- 
   factor(df$q03_pref_int_ext, levels = q03_levels, ordered = TRUE)
@@ -174,7 +174,7 @@ show_bar_plot(df, q03_pref_int_ext, 'q03_pref_int_ext')
 
 `r old_names$q04_affect_start`
 
-```{r q04_affect_start_plot, fig.height=2.5}
+```{r q04_affect_start_plot}
 show_bar_plot(df, q04_affect_start, 'q04_affect_start')
 ```
 
@@ -202,7 +202,7 @@ show_xtab_plot(df, 'q04_affect_start', 'q02_mytrack', title.y = 'Respondent Trac
 
 `r old_names$q06_affect_cost`
 
-```{r q06_affect_cost_plot, fig.height=2.5}
+```{r q06_affect_cost_plot}
 show_bar_plot(df, q06_affect_cost, 'q06_affect_cost')
 ```
 
@@ -230,7 +230,7 @@ show_xtab_plot(df, 'q06_affect_cost', 'q02_mytrack', title.y = 'Respondent Track
 
 `r old_names$q08_affect_funds`
 
-```{r q08_affect_funds_plot, fig.height=2.5}
+```{r q08_affect_funds_plot}
 show_bar_plot(df, q08_affect_funds, 'q08_affect_funds')
 ```
 
@@ -258,7 +258,7 @@ show_xtab_plot(df, 'q08_affect_funds', 'q02_mytrack', title.y = 'Respondent Trac
 
 `r old_names$q10_affect_freeze`
 
-```{r q10_affect_freeze_plot, fig.height=2.5}
+```{r q10_affect_freeze_plot}
 show_bar_plot(df, q10_affect_freeze, 'q10_affect_freeze')
 ```
 
@@ -303,7 +303,7 @@ df_vote %>% knitr::kable(align = 'llrc')
 
 <p>&nbsp;</p>
 
-```{r q12_ranking_plot, fig.height=2.5}
+```{r q12_ranking_plot}
 df_rank <- df_rank %>%  
   mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:5]))
 title <- 'Total Ranking Scores per Candidate (lower Total means higher rank)'
@@ -318,7 +318,7 @@ df_vote[1:5, ] %>%
 
 <p>&nbsp;</p>
 
-```{r q12_ranking_heatmap, fig.height=2.5, fig.width=7}
+```{r q12_ranking_heatmap}
 N <- nrow(df)
 title.y <- paste0('Response (N=', N, ')')
 pal <- hcl.colors(5, "RdYlGn")
