@@ -316,7 +316,9 @@ df_vote[1:5, ] %>%
 
 <p>&nbsp;</p>
 
-```{r q12_ranking_heatmap, fig.height=2, fig.width=7}
+```{r q12_ranking_heatmap, fig.height=2.5, fig.width=7}
+N <- nrow(df)
+title.y <- paste0('Ranking Response (N=', N, ')')
 pal <- hcl.colors(5, "RdYlGn")
 pal_text <- ifelse(df_rank$Rank < 2 | df_rank$Rank > 4, 'white', 'black')
 title <- 'Ranking Heatmap'
@@ -326,11 +328,8 @@ df_rank %>% mutate(id = as.integer((id))) %>%
   scale_fill_gradientn(colors = pal, transform = 'reverse') + theme_minimal() + 
   theme(
     axis.ticks.y = element_blank(),
-    axis.title.y = element_blank(),
-    axis.title.x = element_blank(), 
-    axis.ticks.x = element_blank(),
-    axis.text.x = element_blank()
-  ) + ggtitle(title) + coord_flip()
+    axis.title.y = element_blank()
+  ) + ylab(title.y) + ggtitle(title) + coord_flip()
 ```
 
 \newpage
