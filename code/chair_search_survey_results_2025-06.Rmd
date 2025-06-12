@@ -18,8 +18,7 @@ knitr::opts_chunk$set(echo = FALSE, cache.rebuild = TRUE, fig.height=2.5)
 ```{r package_setup}
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
-pacman::p_load(here, folders, readxl, tibble, dplyr, tidyr, stringr, purrr, 
-               ggplot2, colorspace, forcats, CGPfunctions)
+pacman::p_load(here, folders, readxl, tibble, dplyr, forcats, stringr, ggplot2)
 ```
 
 ```{r folder_setup}
