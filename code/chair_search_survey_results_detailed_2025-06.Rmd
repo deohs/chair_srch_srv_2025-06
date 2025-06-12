@@ -160,6 +160,9 @@ show_counts(df, q02_mytrack)
 `r old_names$q03_pref_int_ext`
 
 ```{r q03_pref_int_ext_plot, fig.height=2.5}
+q03_levels <- c("Internal", "No preference", "External")
+df$q03_pref_int_ext <- 
+  factor(df$q03_pref_int_ext, levels = q03_levels, ordered = TRUE)
 show_bar_plot(df, q03_pref_int_ext, 'q03_pref_int_ext')
 ```
 
