@@ -320,10 +320,10 @@ df_vote[1:5, ] %>%
 
 ```{r q12_ranking_heatmap}
 N <- nrow(df)
-title.y <- paste0('Ranking Vote (N=', N, ')')
+title.y <- paste0('Vote (N=', N, ')')
 pal <- hcl.colors(5, "RdYlGn")
 pal_text <- ifelse(df_rank$Rank < 2 | df_rank$Rank > 4, 'white', 'black')
-title <- 'Candidate Ranking Heatmap'
+title <- 'Ranked Vote Heatmap'
 df_rank %>% mutate(id = as.integer((id))) %>% 
   ggplot(aes(fct_rev(Candidate), id, fill = Rank)) + geom_tile() + 
   geom_text(aes(label = Rank), alpha = 0.6, color = pal_text, size = 4) + 
