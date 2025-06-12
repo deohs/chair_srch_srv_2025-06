@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = FALSE, cache.rebuild = TRUE, fig.height=2.5)
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
 pacman::p_load(here, folders, readxl, tibble, dplyr, tidyr, stringr, purrr, 
-               ggplot2, forcats, CGPfunctions)
+               ggplot2, forcats, CGPfunctions, vote)
 ```
 
 ```{r folder_setup}
@@ -77,9 +77,15 @@ xform_ranking <- function(x) {
     mutate(Candidate = str_trim(Candidate))
 }
 
-rank_ties <- function(df, rankvar = 'Rank', valvar = 'Total', rows = 1:5) {
-  df[[rankvar]][rows] <- 
-    as.numeric(factor(rank(df[[valvar]][rows], ties.method='min')))
+rank_ties <- function(df, rankvar = 'Rank', valvar = 'Total', rows = 1:5, 
+                      invert = FALSE) {
+  if (isTRUE(invert)) {
+    df[[rankvar]][rows] <- 
+      as.numeric(fct_rev(factor(rank(df[[valvar]][rows], ties.method='min'))))
+  } else {
+    df[[rankvar]][rows] <- 
+      as.numeric(factor(rank(df[[valvar]][rows], ties.method='min')))
+  }
   df
 }
 ```
@@ -386,4 +392,63 @@ show_comments(df$q14_final_comments, caption = 'Final Comments.')
 ```{r folder_cleanup}
 # Cleanup unused (empty) folders
 result <- cleanup_folders(folders)
+```
+
+\newpage
+
+### Appendix A: Compare Vote Count Methods with `vote` Package
+
+Using `vote::count.votes()` with `method='score'` and `larger.wins=FALSE` 
+reproduces the results shown above (Inverted Borda Count).
+
+```{r q12_ranking_vote}
+df_rank_wide <- df_rank %>% 
+  pivot_wider(names_from = Candidate, values_from = Rank, values_fill = NA) %>%
+  select(-id)
+df_vote_score <- df_rank_wide %>% count.votes(
+    method='score', larger.wins=FALSE, max.score=num_cand, quiet=TRUE
+    ) %>% summary() %>% rownames_to_column('Rank') %>% 
+  mutate(Total = as.integer(Total)) %>% as_tibble() %>% 
+  arrange(Total, Candidate)
+df_vote_score <- rank_ties(df_vote_score)
+df_vote_score %>% knitr::kable(align = 'llrc', 
+  caption = "count.votes(method='score', larger.wins=FALSE).")
+```
+
+Using `vote::approval()` with `nseats=1` and counting only the rank `1` votes, 
+but allowing ballots that assigned `1` to more than one candidate, we still 
+elect the same Candidate.
+
+```{r q12_approval_vote}
+df_vote_approval <- df_rank_wide %>% 
+   mutate(across(any_of(names(.)), ~ ifelse(. == 1, 1, 0))) %>% 
+  approval(nseats=1, quiet=TRUE) %>% summary() %>% 
+  rownames_to_column('Rank') %>% 
+  mutate(Total = as.integer(Total)) %>% as_tibble()
+df_vote_approval <- rank_ties(df_vote_approval, invert = TRUE)
+df_vote_approval %>% knitr::kable(align = 'llrc', 
+  caption = "approval(nseats=1).")
+```
+
+Using `vote::stv()` with `nseats=1` and `equal.ranking=TRUE` will count votes 
+by the Single Transferable Voting method, also known as Ranked Choice Voting or 
+Instant Runoff. As before, we allow ballots that assigned `1` to more than one 
+candidate (`equal.ranking=TRUE`). This method also elects the same Candidate.
+
+```{r q12_stv_vote}
+df_vote_stv <- df_rank_wide %>% 
+  stv(nseats=1, equal.ranking=TRUE, quiet=TRUE) %>% summary()
+df_vote_stv <- df_vote_stv %>% 
+  rename('Score' = `1`) %>% rownames_to_column('Candidate') 
+df_vote_stv_extra <- df_vote_stv %>% 
+  filter(Candidate %in% c('Quota', 'Elected', 'Eliminated')) %>% as_tibble()
+df_vote_stv <- df_vote_stv %>% 
+  filter(!Candidate %in% c('Quota', 'Elected', 'Eliminated')) %>% 
+  arrange(desc(Score), Candidate) %>% 
+  rownames_to_column('Rank') %>% as_tibble() %>% 
+  rank_ties(rankvar = 'Rank', valvar = 'Score', invert = TRUE) %>% 
+  bind_rows(df_vote_stv_extra) %>% 
+  mutate(Rank = ifelse(is.na(Rank), '', Rank))
+df_vote_stv %>% 
+  knitr::kable(align = 'llr', caption = "stv(nseats=1, equal.ranking=TRUE).")
 ```
