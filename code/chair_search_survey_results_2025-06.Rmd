@@ -18,7 +18,8 @@ knitr::opts_chunk$set(echo = FALSE, cache.rebuild = TRUE, fig.height=2.5)
 ```{r package_setup}
 # Load packages, installing as needed
 if (!requireNamespace("pacman", quietly = TRUE)) install.packages('pacman')
-pacman::p_load(here, folders, readxl, tibble, dplyr, forcats, stringr, ggplot2)
+pacman::p_load(here, folders, readxl, tibble, dplyr, tidyr, stringr, purrr, 
+               ggplot2, colorspace, forcats, CGPfunctions)
 ```
 
 ```{r folder_setup}
@@ -29,9 +30,9 @@ result <- create_folders(folders)
 ```
 
 ```{r functions}
-show_counts <- function(df, x) {
+show_counts <- function(df, x, caption) {
   df %>% group_by({{x}}) %>% summarise(Count = n()) %>% 
-    arrange(desc(Count), {{x}}) %>% knitr::kable()
+    arrange(desc(Count), {{x}}) %>% knitr::kable(caption = caption)
 }
 
 show_bar_plot <- function(df, x, title = '') {
@@ -54,17 +55,17 @@ fp <- here(folders$data, fn)
 txt_fp <- here(folders$data, txt_fn)
 csv_fp <- here(folders$data, csv_fn)
 
-level <- c("Strongly favor internal candidate", 
-           "Slightly favor internal candidate", 
-           "This does not affect my final preference for an internal or external candidate.", 
-           "Slightly favor external candidate", 
-           "Strongly favor external candidate")
+affect_level <- c("Strongly favor internal candidate", 
+  "Slightly favor internal candidate", 
+  "This does not affect my final preference for an internal or external candidate.", 
+  "Slightly favor external candidate", 
+  "Strongly favor external candidate")
 
-label <- c("Strongly favor internal candidate", 
-           "Slightly favor internal candidate", 
-           "Does not affect my final preference", 
-           "Slightly favor external candidate", 
-           "Strongly favor external candidate")
+affect_label <- c("Strongly favor internal candidate", 
+  "Slightly favor internal candidate", 
+  "Does not affect my final preference", 
+  "Slightly favor external candidate", 
+  "Strongly favor external candidate")
 
 new_names <- c('id', 'start_time', 'end_time', 'mod_time', 
                'q01_myrank', 'q02_mytrack', 'q03_pref_int_ext', 
@@ -91,10 +92,12 @@ if (( ! file.exists(csv_fp) ) |
   old_names <- as.list(readLines(txt_fp)) %>% .[. != ''] %>% .[1:18]
   names(old_names) <- new_names
 }
-
 df <- df %>% 
   mutate(across(matches('^q\\d+_affect_[a-z]+$'), 
-                ~ factor(.x, levels = level, labels = label, ordered = TRUE)))
+           ~ factor(.x, levels = affect_level, labels = affect_label, 
+                    ordered = TRUE)),
+         across(matches('_comments?$'), 
+           ~ ifelse(!is.na(.x), paste('•', str_remove_all(.x, '[\n]+')), .x)))
 ```
 
 ## Section 1
@@ -102,16 +105,16 @@ df <- df %>%
 ### Q1: `r old_names$q01_myrank`
 
 ```{r q01_myrank}
-show_counts(df, q01_myrank)
+show_counts(df, q01_myrank, caption = 'Count of Respondents by Rank.')
 ```
 
 ### Q2: `r old_names$q02_mytrack`
 
 ```{r q02_mytrack}
-show_counts(df, q02_mytrack)
+show_counts(df, q02_mytrack, caption = 'Count of Respondents by Track.')
 ```
 
-### Q3: Preference (Internal, External, or None)
+### Q3: Preference (Internal, No Preference, or External)
 
 `r old_names$q03_pref_int_ext`
 
@@ -119,45 +122,45 @@ show_counts(df, q02_mytrack)
 q03_levels <- c("Internal", "No preference", "External")
 df$q03_pref_int_ext <- 
   factor(df$q03_pref_int_ext, levels = q03_levels, ordered = TRUE)
-show_bar_plot(df, q03_pref_int_ext, 'q03_pref_int_ext')
+show_bar_plot(df, q03_pref_int_ext, 
+              'Preference (Internal, No Preference, or External)')
 ```
-
-\newpage
 
 ## Section 2
 
-### Q4: Preference (affect factor: delayed start)
+### Q4: Preference (factor: delayed start)
 
 `r old_names$q04_affect_start`
 
 ```{r q04_affect_start_plot}
-show_bar_plot(df, q04_affect_start, 'q04_affect_start')
+show_bar_plot(df, q04_affect_start, 'Preference (factor: delayed start)')
 ```
 
-### Q6: Preference (affect factor: additional cost)
+### Q6: Preference (factor: additional cost)
 
 `r old_names$q06_affect_cost`
 
 ```{r q06_affect_cost_plot}
-show_bar_plot(df, q06_affect_cost, 'q06_affect_cost')
+show_bar_plot(df, q06_affect_cost, 'Preference (factor: additional cost)')
 ```
 
 \newpage
 
-### Q8: Preference (affect factor: availability of funds)
+### Q8: Preference (factor: availability of funds)
 
 `r old_names$q08_affect_funds`
 
 ```{r q08_affect_funds_plot}
-show_bar_plot(df, q08_affect_funds, 'q08_affect_funds')
+show_bar_plot(df, q08_affect_funds, 'Preference (factor: availability of funds)')
 ```
 
-### Q10: Preference (affect factor: opportunity cost / hiring freeze)
+### Q10: Preference (factor: opportunity cost)
 
 `r old_names$q10_affect_freeze`
 
 ```{r q10_affect_freeze_plot}
-show_bar_plot(df, q10_affect_freeze, 'q10_affect_freeze')
+show_bar_plot(df, q10_affect_freeze, 
+              'Preference (factor: opportunity cost)')
 ```
 
 ```{r folder_cleanup}

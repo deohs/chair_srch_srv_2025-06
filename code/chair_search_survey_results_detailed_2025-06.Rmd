@@ -152,7 +152,7 @@ show_counts(df, q01_myrank, caption = 'Count of Respondents by Rank.')
 show_counts(df, q02_mytrack, caption = 'Count of Respondents by Track.')
 ```
 
-### Q3: Preference (Internal, External, or None)
+### Q3: Preference (Internal, No Preference, or External)
 
 `r old_names$q03_pref_int_ext`
 
@@ -160,137 +160,159 @@ show_counts(df, q02_mytrack, caption = 'Count of Respondents by Track.')
 q03_levels <- c("Internal", "No preference", "External")
 df$q03_pref_int_ext <- 
   factor(df$q03_pref_int_ext, levels = q03_levels, ordered = TRUE)
-show_bar_plot(df, q03_pref_int_ext, 'q03_pref_int_ext')
+show_bar_plot(df, q03_pref_int_ext, 
+              'Preference (Internal, No Preference, or External)')
 ```
 
 \newpage
 
 ```{r q03_pref_int_ext_xtab_myrank_plot, fig.height=4, fig.width=9}
-show_xtab_plot(df, 'q03_pref_int_ext', 'q01_myrank', title.y = 'Respondent Rank')
+show_xtab_plot(df, 'q03_pref_int_ext', 'q01_myrank', 
+               title.x = 'Preference (Internal, No Preference, or External)', 
+               title.y = 'Respondent Rank')
 ```
 
 <p>&nbsp;</p>
 
 ```{r q03_pref_int_ext_xtab_mytrack_plot, fig.height=4, fig.width=9}
-show_xtab_plot(df, 'q03_pref_int_ext', 'q02_mytrack', title.y = 'Respondent Track')
+show_xtab_plot(df, 'q03_pref_int_ext', 'q02_mytrack', 
+               title.x = 'Preference (Internal, No Preference, or External)', 
+               title.y = 'Respondent Track')
 ```
 
 \newpage
 
 ## Section 2
 
-### Q4: Preference (affect factor: delayed start)
+### Q4: Preference (factor: delayed start)
 
 `r old_names$q04_affect_start`
 
 ```{r q04_affect_start_plot}
-show_bar_plot(df, q04_affect_start, 'q04_affect_start')
+show_bar_plot(df, q04_affect_start, 'Preference (factor: delayed start)')
 ```
 
 <p>&nbsp;</p>
 
 ```{r q05_affect_start_comment}
 show_comments(df$q05_affect_start_comment, 
-              caption = 'Comments about q04_affect_start.')
+  caption = 'Comments about Preference (factor: delayed start).')
 ```
 
 \newpage
 
 ```{r q04_affect_start_xtab_myrank_plot, fig.height=4, fig.width=9}
-show_xtab_plot(df, 'q04_affect_start', 'q01_myrank', title.y = 'Respondent Rank')
+show_xtab_plot(df, 'q04_affect_start', 'q01_myrank', 
+               title.x = 'Preference (factor: delayed start)',
+               title.y = 'Respondent Rank')
 ```
 
 <p>&nbsp;</p>
 
 ```{r q04_affect_start_xtab_mytrack_plot, fig.height=4, fig.width=9}
-show_xtab_plot(df, 'q04_affect_start', 'q02_mytrack', title.y = 'Respondent Track')
+show_xtab_plot(df, 'q04_affect_start', 'q02_mytrack', 
+               title.x = 'Preference (factor: delayed start)', 
+               title.y = 'Respondent Track')
 ```
 
 \newpage
 
-### Q6: Preference (affect factor: additional cost)
+### Q6: Preference (factor: additional cost)
 
 `r old_names$q06_affect_cost`
 
 ```{r q06_affect_cost_plot}
-show_bar_plot(df, q06_affect_cost, 'q06_affect_cost')
+show_bar_plot(df, q06_affect_cost, 'Preference (factor: additional cost)')
 ```
 
 <p>&nbsp;</p>
 
 ```{r q07_affect_cost_comment}
 show_comments(df$q07_affect_cost_comment, 
-              caption = 'Comments about q06_affect_cost.')
+  caption = 'Comments about Preference (factor: additional cost).')
 ```
 
 \newpage
 
 ```{r q06_affect_cost_xtab_myrank_plot, fig.height=4, fig.width=9}
-show_xtab_plot(df, 'q06_affect_cost', 'q01_myrank', title.y = 'Respondent Rank')
+show_xtab_plot(df, 'q06_affect_cost', 'q01_myrank', 
+               title.x = 'Preference (factor: additional cost)',
+               title.y = 'Respondent Rank')
 ```
 
 <p>&nbsp;</p>
 
 ```{r q06_affect_cost_xtab_mytrack_plot, fig.height=4, fig.width=9}
-show_xtab_plot(df, 'q06_affect_cost', 'q02_mytrack', title.y = 'Respondent Track')
+show_xtab_plot(df, 'q06_affect_cost', 'q02_mytrack', 
+               title.x = 'Preference (factor: additional cost)', 
+               title.y = 'Respondent Track')
 ```
 
 \newpage
 
-### Q8: Preference (affect factor: availability of funds)
+### Q8: Preference (factor: availability of funds)
 
 `r old_names$q08_affect_funds`
 
 ```{r q08_affect_funds_plot}
-show_bar_plot(df, q08_affect_funds, 'q08_affect_funds')
+show_bar_plot(df, q08_affect_funds, 'Preference (factor: availability of funds)')
 ```
 
 <p>&nbsp;</p>
 
 ```{r q09_affect_funds_comment}
 show_comments(df$q09_affect_funds_comment, 
-              caption = 'Comments about q08_affect_funds.')
+  caption = 'Comments about Preference (factor: availability of funds).')
 ```
 
 \newpage
 
 ```{r q08_affect_funds_xtab_myrank_plot, fig.height=4, fig.width=9}
-show_xtab_plot(df, 'q08_affect_funds', 'q01_myrank', title.y = 'Respondent Rank')
+show_xtab_plot(df, 'q08_affect_funds', 'q01_myrank', 
+               title.x = 'Preference (factor: availability of funds)', 
+               title.y = 'Respondent Rank')
 ```
 
 <p>&nbsp;</p>
 
 ```{r q08_affect_funds_xtab_mytrack_plot, fig.height=4, fig.width=9}
-show_xtab_plot(df, 'q08_affect_funds', 'q02_mytrack', title.y = 'Respondent Track')
+show_xtab_plot(df, 'q08_affect_funds', 'q02_mytrack', 
+               title.x = 'Preference (factor: availability of funds)', 
+               title.y = 'Respondent Track')
 ```
 
 \newpage
 
-### Q10: Preference (affect factor: opportunity cost / hiring freeze)
+### Q10: Preference (factor: opportunity cost)
 
 `r old_names$q10_affect_freeze`
 
 ```{r q10_affect_freeze_plot}
-show_bar_plot(df, q10_affect_freeze, 'q10_affect_freeze')
+show_bar_plot(df, q10_affect_freeze, 
+              'Preference (factor: opportunity cost)')
 ```
 
 <p>&nbsp;</p>
 
 ```{r q11_affect_freeze_comment}
 show_comments(df$q11_affect_freeze_comment, 
-              caption = 'Comments about q10_affect_freeze.')
+  caption = 'Comments about Preference (factor: opportunity cost).')
 ```
 
 \newpage
 
 ```{r q10_affect_freeze_xtab_myrank_plot, fig.height=4, fig.width=9}
-show_xtab_plot(df, 'q10_affect_freeze', 'q01_myrank', title.y = 'Respondent Rank')
+show_xtab_plot(df, 'q10_affect_freeze', 'q01_myrank', 
+  title.x = 'Preference (factor: opportunity cost)', 
+  title.y = 'Respondent Rank')
 ```
 
 <p>&nbsp;</p>
 
 ```{r q10_affect_freeze_xtab_mytrack_plot, fig.height=4, fig.width=9}
-show_xtab_plot(df, 'q10_affect_freeze', 'q02_mytrack', title.y = 'Respondent Track')
+show_xtab_plot(df, 'q10_affect_freeze', 'q02_mytrack', 
+  title.x = 'Preference (factor: opportunity cost)', 
+  title.y = 'Respondent Track')
 ```
 
 \newpage
@@ -350,7 +372,7 @@ df_rank %>% mutate(id = as.integer((id))) %>%
 
 ```{r q13_ranking_comment}
 show_comments(df$q13_ranking_comment, 
-              caption = 'Comments about q12_ranking.')
+              caption = 'Comments about Candidate Ranking.')
 ```
 
 \newpage
