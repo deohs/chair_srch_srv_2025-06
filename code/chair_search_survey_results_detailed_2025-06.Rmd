@@ -91,6 +91,7 @@ csv_fn <- str_replace(fn, '\\.xlsx$', '.csv')
 fp <- here(folders$data, fn)
 txt_fp <- here(folders$data, txt_fn)
 csv_fp <- here(folders$data, csv_fn)
+num_cand <- 5
 
 affect_level <- c("Strongly favor internal candidate", 
   "Slightly favor internal candidate", 
@@ -306,9 +307,9 @@ df_vote %>% knitr::kable(align = 'llrc',
 
 ```{r q12_ranking_plot}
 df_rank <- df_rank %>%  
-  mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:5]))
+  mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:num_cand]))
 title <- 'Total Ranking Scores per Candidate (lower Total means higher rank)'
-df_vote[1:5, ] %>% 
+df_vote[1:num_cand, ] %>% 
   mutate(Candidate = 
            factor(Candidate, 
                   ordered = TRUE, 
@@ -322,7 +323,7 @@ df_vote[1:5, ] %>%
 ```{r q12_ranking_heatmap}
 N <- nrow(df)
 title.y <- paste0('Vote (N=', N, ')')
-pal <- hcl.colors(5, "RdYlGn")
+pal <- hcl.colors(num_cand, "RdYlGn")
 pal_text <- ifelse(df_rank$Rank < 2 | df_rank$Rank > 4, 'white', 'black')
 title <- 'Ranked Vote Heatmap'
 df_rank %>% mutate(id = as.integer((id))) %>% 
