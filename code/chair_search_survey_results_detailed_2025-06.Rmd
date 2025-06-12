@@ -165,6 +165,18 @@ show_bar_plot(df, q03_pref_int_ext, 'q03_pref_int_ext')
 
 \newpage
 
+```{r q03_pref_int_ext_xtab_myrank_plot, fig.height=4, fig.width=9}
+show_xtab_plot(df, 'q03_pref_int_ext', 'q01_myrank', title.y = 'Respondent Rank')
+```
+
+<p>&nbsp;</p>
+
+```{r q03_pref_int_ext_xtab_mytrack_plot, fig.height=4, fig.width=9}
+show_xtab_plot(df, 'q03_pref_int_ext', 'q02_mytrack', title.y = 'Respondent Track')
+```
+
+\newpage
+
 ## Section 2
 
 ### Q4: Preference (affect factor: delayed start)
