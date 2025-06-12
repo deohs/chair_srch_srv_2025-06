@@ -288,7 +288,7 @@ show_xtab_plot(df, 'q10_affect_freeze', 'q02_mytrack', title.y = 'Respondent Tra
 
 `r old_names$q12_ranking`
 
-#### Ranking with {dplyr}
+#### Ranking
 
 ```{r q12_ranking_dplyr}
 df_rank <- map_df(df$q12_ranking, xform_ranking, .id = 'id')
@@ -303,23 +303,6 @@ df_vote <- rank_ties(df_vote)
 df_vote %>% knitr::kable(align = 'llrc')
 ```
 
-#### Ranking with {vote}
-
-```{r q12_ranking_vote}
-df_rank_wide <- df_rank %>% 
-  pivot_wider(names_from = Candidate, values_from = Rank, values_fill = NA) %>%
-  select(-id)
-df_vote_score <- df_rank_wide %>% count.votes(
-    method = 'score', max.score = 5, larger.wins = FALSE, quiet = TRUE
-    ) %>% summary() %>% rownames_to_column('Rank') %>% 
-  mutate(Total = as.integer(Total)) %>% as_tibble() %>% 
-  arrange(Total, Candidate)
-df_vote_score <- rank_ties(df_vote_score)
-df_vote_score %>% knitr::kable(align = 'llrc')
-```
-
-The two methods yielded identical results: `r identical(df_vote, df_vote_score)`
-
 <p>&nbsp;</p>
 
 ```{r q12_ranking_plot, fig.height=2.5}
@@ -331,26 +314,26 @@ df_vote[1:5, ] %>%
                             levels = levels(df_rank$Candidate))) %>% show_bar_plot_identity(x = Candidate, y = Total, title = title)
 ```
 
-\newpage
+<p>&nbsp;</p>
 
-```{r q12_ranking_heatmap}
+```{r q12_ranking_heatmap, fig.height=2, fig.width=7}
 pal <- hcl.colors(5, "RdYlGn")
 pal_text <- ifelse(df_rank$Rank < 2 | df_rank$Rank > 4, 'white', 'black')
 title <- 'Ranking Heatmap'
 df_rank %>% mutate(id = as.integer((id))) %>% 
-  ggplot(aes(Candidate, id, fill = Rank)) + geom_tile() + ggtitle(title) + 
+  ggplot(aes(fct_rev(Candidate), id, fill = Rank)) + geom_tile() + 
   geom_text(aes(label = Rank), alpha = 0.6, color = pal_text, size = 4) + 
   scale_fill_gradientn(colors = pal, transform = 'reverse') + theme_minimal() + 
   theme(
-    axis.ticks.x = element_blank(),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank(), 
     axis.ticks.y = element_blank(),
-    axis.text.y = element_blank()
-  )
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(), 
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank()
+  ) + ggtitle(title) + coord_flip()
 ```
 
-### Q13: Comments
+\newpage
 
 ```{r q13_ranking_comment}
 show_comments(df$q13_ranking_comment)
