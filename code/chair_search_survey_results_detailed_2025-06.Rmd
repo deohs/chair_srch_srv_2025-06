@@ -308,8 +308,12 @@ df_rank <- df_rank %>%
   mutate(Candidate = fct_relevel(Candidate, df_vote$Candidate[1:5]))
 title <- 'Total Ranking Scores per Candidate (lower Total means higher rank)'
 df_vote[1:5, ] %>% 
-  mutate(Candidate = factor(Candidate, ordered = TRUE, 
-                            levels = levels(df_rank$Candidate))) %>% show_bar_plot_identity(x = Candidate, y = Total, title = title)
+  mutate(Candidate = 
+           factor(Candidate, 
+                  ordered = TRUE, 
+                  levels = levels(df_rank$Candidate))
+         ) %>% 
+  show_bar_plot_identity(x = Candidate, y = Total, title = title)
 ```
 
 <p>&nbsp;</p>
@@ -324,10 +328,8 @@ df_rank %>% mutate(id = as.integer((id))) %>%
   ggplot(aes(fct_rev(Candidate), id, fill = Rank)) + geom_tile() + 
   geom_text(aes(label = Rank), alpha = 0.6, color = pal_text, size = 4) + 
   scale_fill_gradientn(colors = pal, transform = 'reverse') + theme_minimal() + 
-  theme(
-    axis.ticks.y = element_blank(),
-    axis.title.y = element_blank()
-  ) + ylab(title.y) + ggtitle(title) + coord_flip()
+  theme(axis.ticks.y = element_blank(), axis.title.y = element_blank()) + 
+  ylab(title.y) + ggtitle(title) + coord_flip()
 ```
 
 \newpage
