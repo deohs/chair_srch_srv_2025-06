@@ -69,12 +69,18 @@ show_comments <- function(x, caption) {
   x %>% .[!is.na(.)] %>% knitr::kable(col.names = 'Comments', caption = caption)
 }
 
-xform_ranking <- function(x) {
-  x %>% str_remove(';$') %>% str_split('\\s*;\\s*') %>% 
+xform_ranking <- function(x, condorcet.ranking = FALSE) {
+  df <- x %>% 
+    str_remove(';$') %>% str_split('\\s*;\\s*') %>% 
     setNames('Candidate') %>% as_tibble() %>% 
     rowid_to_column(var = 'Rank') %>% 
     separate_longer_delim(Candidate, '=') %>% 
     mutate(Candidate = str_trim(Candidate))
+  if (condorcet.ranking) {
+    df <- df %>% 
+      mutate(Rank = rank(Rank, ties.method = 'min'))
+  }
+  df
 }
 
 rank_ties <- function(df, rankvar = 'Rank', valvar = 'Total', rows = 1:5, 
@@ -452,3 +458,20 @@ df_vote_stv <- df_vote_stv %>%
 df_vote_stv %>% 
   knitr::kable(align = 'llr', caption = "stv(nseats=1, equal.ranking=TRUE).")
 ```
+
+\newpage
+
+Using `condorcet()` will elect the candidate that beats all other candidates in 
+pairwise comparisons. The Condorcet loser will be the candidate that loses 
+against all other candidates. It is possible that neither a Condorcet winner or 
+loser exists. In this case, they do, and the winner is the same as with the 
+previous methods shown above.
+
+```{r q12_condorcet_vote}
+df_rank <- map_df(df$q12_ranking, xform_ranking, condorcet.ranking = TRUE, 
+                  .id = 'id')
+df_rank_wide <- df_rank %>% 
+  pivot_wider(names_from = Candidate, values_from = Rank, values_fill = NA) %>%
+  select(-id)
+df_vote_condorcet <- df_rank_wide %>% condorcet(quiet = TRUE) %>% summary()
+df_vote_condorcet %>% knitr::kable(caption = "condorcet().")
