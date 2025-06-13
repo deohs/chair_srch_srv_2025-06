@@ -69,25 +69,24 @@ show_comments <- function(x, caption) {
   x %>% .[!is.na(.)] %>% knitr::kable(col.names = 'Comments', caption = caption)
 }
 
-xform_ranking <- function(x, condorcet.ranking = FALSE) {
+xform_ranking <- function(x, rerank_ties=FALSE, ties.method = 'min') {
   df <- x %>% 
     str_remove(';$') %>% str_split('\\s*;\\s*') %>% 
     setNames('Candidate') %>% as_tibble() %>% 
-    rowid_to_column(var = 'Rank') %>% 
+    rowid_to_column(var = 'Rank') %>%      # No skipped ranks, even with a tie 
     separate_longer_delim(Candidate, '=') %>% 
     mutate(Candidate = str_trim(Candidate))
-  if (condorcet.ranking) {
-    df <- df %>% 
-      mutate(Rank = rank(Rank, ties.method = 'min'))
-  }
+  if (rerank_ties)                         # Skip a rank in the event of a tie
+    df$Rank <- rank(df$Rank, ties.method = ties.method)
   df
 }
 
 rank_ties <- function(df, rankvar = 'Rank', valvar = 'Total', rows = 1:5, 
-                      invert = FALSE) {
+                      invert = FALSE, ties.method='min') {
   if (isTRUE(invert)) {
     df[[rankvar]][rows] <- 
-      as.numeric(fct_rev(factor(rank(df[[valvar]][rows], ties.method='min'))))
+      as.numeric(fct_rev(factor(rank(df[[valvar]][rows], 
+                                     ties.method=ties.method))))
   } else {
     df[[rankvar]][rows] <- 
       as.numeric(factor(rank(df[[valvar]][rows], ties.method='min')))
@@ -468,8 +467,9 @@ winner or loser exists. In this case, they do, and the winner is the same as
 with the previous methods shown above.
 
 ```{r q12_condorcet_vote}
-df_rank <- map_df(df$q12_ranking, xform_ranking, condorcet.ranking = TRUE, 
-                  .id = 'id')
+df_rank <- 
+  map_df(df$q12_ranking, xform_ranking, rerank_ties=TRUE, ties.method = 'min', 
+         .id = 'id')
 df_rank_wide <- df_rank %>% 
   pivot_wider(names_from = Candidate, values_from = Rank, values_fill = NA) %>%
   select(-id)
