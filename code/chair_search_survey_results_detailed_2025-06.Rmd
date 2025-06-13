@@ -69,7 +69,7 @@ show_comments <- function(x, caption) {
   x %>% .[!is.na(.)] %>% knitr::kable(col.names = 'Comments', caption = caption)
 }
 
-xform_ranking <- function(x, rerank_ties=FALSE, ties.method = 'min') {
+xform_ranking <- function(x, rerank_ties = FALSE, ties.method = 'min') {
   df <- x %>% 
     str_remove(';$') %>% str_split('\\s*;\\s*') %>% 
     setNames('Candidate') %>% as_tibble() %>% 
