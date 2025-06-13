@@ -69,7 +69,7 @@ show_comments <- function(x, caption) {
   x %>% .[!is.na(.)] %>% knitr::kable(col.names = 'Comments', caption = caption)
 }
 
-xform_ranking <- function(x, rerank_ties = FALSE, ties.method = 'min') {
+xform_ranking <- function(x, rerank_ties = TRUE, ties.method = 'min') {
   df <- x %>% 
     str_remove(';$') %>% str_split('\\s*;\\s*') %>% 
     setNames('Candidate') %>% as_tibble() %>% 
@@ -82,7 +82,7 @@ xform_ranking <- function(x, rerank_ties = FALSE, ties.method = 'min') {
 }
 
 rank_ties <- function(df, rankvar = 'Rank', valvar = 'Total', rows = 1:5, 
-                      invert = FALSE, ties.method='min') {
+                      invert = FALSE, ties.method = 'min') {
   if (isTRUE(invert)) {
     df[[rankvar]][rows] <- 
       as.numeric(fct_rev(factor(rank(df[[valvar]][rows], 
