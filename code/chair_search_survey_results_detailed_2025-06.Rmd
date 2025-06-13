@@ -467,11 +467,10 @@ winner or loser exists. In this case, they do, and the winner is the same as
 with the previous methods shown above.
 
 ```{r q12_condorcet_vote}
-df_rank <- 
-  map_df(df$q12_ranking, xform_ranking, rerank_ties=TRUE, ties.method = 'min', 
-         .id = 'id')
+df_rank <- map_df(df$q12_ranking, xform_ranking, .id = 'id')
 df_rank_wide <- df_rank %>% 
   pivot_wider(names_from = Candidate, values_from = Rank, values_fill = NA) %>%
   select(-id)
 df_vote_condorcet <- df_rank_wide %>% condorcet(quiet = TRUE) %>% summary()
 df_vote_condorcet %>% knitr::kable(caption = "condorcet().")
+```
