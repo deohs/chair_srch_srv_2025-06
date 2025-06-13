@@ -76,7 +76,7 @@ xform_ranking <- function(x, rerank_ties=FALSE, ties.method = 'min') {
     rowid_to_column(var = 'Rank') %>%      # No skipped ranks, even with a tie 
     separate_longer_delim(Candidate, '=') %>% 
     mutate(Candidate = str_trim(Candidate))
-  if (rerank_ties)                         # Skip a rank in the event of a tie
+  if (rerank_ties)                         # May skip ranks, if there is a tie
     df$Rank <- rank(df$Rank, ties.method = ties.method)
   df
 }
