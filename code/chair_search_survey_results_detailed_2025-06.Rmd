@@ -461,11 +461,11 @@ df_vote_stv %>%
 
 \newpage
 
-Using `condorcet()` will elect the candidate that beats all other candidates in 
-pairwise comparisons. The Condorcet loser will be the candidate that loses 
-against all other candidates. It is possible that neither a Condorcet winner or 
-loser exists. In this case, they do, and the winner is the same as with the 
-previous methods shown above.
+Using `vote::condorcet()` will elect the candidate that beats all other 
+candidates in pairwise comparisons. The Condorcet loser will be the candidate 
+that loses against all other candidates. It is possible that neither a Condorcet 
+winner or loser exists. In this case, they do, and the winner is the same as 
+with the previous methods shown above.
 
 ```{r q12_condorcet_vote}
 df_rank <- map_df(df$q12_ranking, xform_ranking, condorcet.ranking = TRUE, 
